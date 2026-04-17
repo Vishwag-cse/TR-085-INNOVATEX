@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Academic Plagiarism & AI Content Detector</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary:#7C3AED;--primary-light:#A78BFA;--primary-pale:#EDE9FE;
+  --orange:#F59E0B;--orange-pale:#FEF3C7;
+  --green:#10B981;--green-pale:#D1FAE5;
+  --red:#EF4444;--red-pale:#FEE2E2;
+  --purple:#A855F7;
+  --bg:#F4F2FF;--surface:#FFFFFF;--surface2:#F9F8FF;--border:#E8E4F4;
+  --text:#1A1232;--text2:#4B4569;--text3:#8B84A8;--dark:#0E0B1F;
+  --sidebar-w:260px;--header-h:70px;
+  --radius:14px;--radius-sm:9px;
+  --shadow:0 2px 12px rgba(124,58,237,.07);
+  --shadow-md:0 8px 28px rgba(124,58,237,.13);
+  --shadow-lg:0 20px 48px rgba(0,0,0,.16);
+  --trans:200ms ease;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+.hidden{display:none!important;}
+
+/* AUTH */
+.auth-screen{min-height:100vh;display:flex;align-items:stretch;}
+.auth-screen.hidden{display:none!important;}
+.auth-brand{width:50%;flex-shrink:0;background:var(--dark);display:flex;flex-direction:column;justify-content:space-between;padding:2.5rem;position:relative;overflow:hidden;}
+.auth-brand::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 15% 5%,rgba(124,58,237,.45) 0%,transparent 55%),radial-gradient(ellipse 55% 45% at 85% 85%,rgba(245,158,11,.22) 0%,transparent 55%),radial-gradient(ellipse 40% 40% at 55% 40%,rgba(168,85,247,.15) 0%,transparent 50%);pointer-events:none;}
+.auth-brand::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;}
+.brand-logo{position:relative;z-index:2;display:flex;align-items:center;gap:.75rem;}
+.brand-logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#7C3AED,#A855F7);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;box-shadow:0 6px 18px rgba(124,58,237,.5);flex-shrink:0;}
+.brand-logo-text{font-family:'Sora',sans-serif;font-size:.82rem;font-weight:600;color:rgba(255,255,255,.85);line-height:1.3;}
+.brand-logo-text small{display:block;font-size:.64rem;font-weight:400;color:rgba(255,255,255,.34);letter-spacing:.07em;text-transform:uppercase;}
+.brand-body{position:relative;z-index:2;}
+.brand-eyebrow{font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(167,139,250,.8);margin-bottom:.65rem;}
+.brand-headline{font-family:'Sora',sans-serif;font-size:2.2rem;font-weight:700;color:#fff;line-height:1.2;letter-spacing:-.025em;margin-bottom:1rem;}
+.brand-headline span{background:linear-gradient(120deg,#A78BFA,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.brand-sub{font-size:.88rem;color:rgba(255,255,255,.4);line-height:1.75;font-weight:300;max-width:340px;}
+.brand-pills{position:relative;z-index:2;display:flex;flex-direction:column;gap:.7rem;}
+.brand-pill{display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.85rem 1.1rem;}
+.bpi{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.bpi.v{background:rgba(124,58,237,.22);color:#A78BFA;}.bpi.o{background:rgba(245,158,11,.2);color:#FCD34D;}.bpi.g{background:rgba(16,185,129,.2);color:#34D399;}.bpi.r{background:rgba(239,68,68,.2);color:#F87171;}
+.brand-pill strong{display:block;font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;color:#fff;}
+.brand-pill span{font-size:.74rem;color:rgba(255,255,255,.37);}
+.auth-content{width:50%;background:#F8F7FF;display:flex;align-items:center;justify-content:center;padding:3rem 3.5rem;position:relative;}
+.auth-content::before{content:'';position:absolute;top:-80px;right:-80px;width:240px;height:240px;background:radial-gradient(circle,rgba(124,58,237,.07),transparent 70%);}
+.auth-box{width:100%;max-width:420px;}
+.auth-head{margin-bottom:2rem;}
+.auth-eyebrow{font-size:.7rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--primary);margin-bottom:.6rem;}
+.auth-head h2{font-family:'Sora',sans-serif;font-size:1.9rem;font-weight:700;color:#1A1232;letter-spacing:-.02em;margin-bottom:.3rem;}
+.auth-head p{font-size:.86rem;color:var(--text3);}
+.role-cards{display:flex;flex-direction:column;gap:.75rem;}
+.role-card{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.3rem;border:1.5px solid #E4E0F4;border-radius:var(--radius);cursor:pointer;background:#fff;transition:all var(--trans);position:relative;overflow:hidden;}
+.role-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3.5px;border-radius:4px 0 0 4px;opacity:0;transition:opacity var(--trans);}
+.role-card.s::before{background:var(--primary);}.role-card.f::before{background:var(--orange);}.role-card.a::before{background:var(--green);}
+.role-card:hover{border-color:transparent;box-shadow:0 6px 24px rgba(124,58,237,.13);transform:translateX(3px);}
+.role-card:hover::before{opacity:1;}.role-card:hover .rc-arr{opacity:1;transform:translateX(0);}
+.rc-ico{width:46px;height:46px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.15rem;}
+.role-card.s .rc-ico{background:rgba(124,58,237,.09);color:var(--primary);}
+.role-card.f .rc-ico{background:rgba(245,158,11,.1);color:var(--orange);}
+.role-card.a .rc-ico{background:rgba(16,185,129,.1);color:var(--green);}
+.rc-txt{flex:1;}.rc-txt h3{font-family:'Sora',sans-serif;font-size:.94rem;font-weight:600;color:var(--text);margin-bottom:.12rem;}.rc-txt p{font-size:.78rem;color:var(--text3);}
+.rc-arr{color:var(--text3);font-size:.82rem;opacity:0;transform:translateX(-5px);transition:all var(--trans);}
+.auth-footnote{margin-top:1.6rem;text-align:center;font-size:.74rem;color:var(--text3);}
+.auth-footnote span{margin:0 .35rem;}
+.role-chip{display:inline-flex;align-items:center;gap:.45rem;padding:.36rem .9rem;border-radius:99px;font-size:.77rem;font-weight:600;border:1.5px solid;margin-bottom:1.5rem;}
+.role-chip.s{background:rgba(124,58,237,.07);color:var(--primary);border-color:rgba(124,58,237,.22);}
+.role-chip.f{background:rgba(245,158,11,.07);color:var(--orange);border-color:rgba(245,158,11,.22);}
+.role-chip.a{background:rgba(16,185,129,.07);color:var(--green);border-color:rgba(16,185,129,.22);}
+.field{margin-bottom:.95rem;}
+.field label{display:block;font-size:.81rem;font-weight:500;color:#3D3552;margin-bottom:.42rem;}
+.field-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.42rem;}
+.field-link{font-size:.78rem;color:var(--primary);font-weight:600;cursor:pointer;transition:opacity var(--trans);}
+.field-link:hover{opacity:.72;}
+.finput{position:relative;}
+.finput i.lft{position:absolute;left:.95rem;top:50%;transform:translateY(-50%);color:#B8B0D4;font-size:.85rem;pointer-events:none;}
+.finput i.rgt{position:absolute;right:.95rem;top:50%;transform:translateY(-50%);color:#B8B0D4;font-size:.85rem;cursor:pointer;z-index:1;}
+.finput input{width:100%;padding:.8rem .95rem .8rem 2.6rem;border:1.5px solid #E4E0F4;border-radius:11px;font-size:.9rem;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);transition:all var(--trans);}
+.finput input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,.09);}
+.finput input::placeholder{color:#CCC8E4;}
+.btn-prim{width:100%;padding:.88rem;border:none;border-radius:11px;font-size:.92rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all var(--trans);display:flex;align-items:center;justify-content:center;gap:.5rem;background:linear-gradient(135deg,#6D28D9,#7C3AED);color:#fff;box-shadow:0 4px 16px rgba(109,40,217,.35);margin-top:1.3rem;}
+.btn-prim:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(109,40,217,.42);}
+.btn-ghost{width:100%;padding:.8rem;border:1.5px solid #E4E0F4;border-radius:11px;font-size:.86rem;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all var(--trans);display:flex;align-items:center;justify-content:center;gap:.5rem;background:transparent;color:var(--text2);margin-top:.6rem;}
+.btn-ghost:hover{background:#EDE9FE;border-color:#D4CEEF;color:var(--text);}
+.btn-signup{width:100%;padding:.8rem;border:1.5px solid rgba(124,58,237,.25);border-radius:11px;font-size:.86rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all var(--trans);display:flex;align-items:center;justify-content:center;gap:.5rem;background:rgba(124,58,237,.06);color:var(--primary);margin-top:.6rem;}
+.btn-signup:hover{background:var(--primary-pale);border-color:rgba(124,58,237,.4);transform:translateY(-1px);}
+.signup-divider{display:flex;align-items:center;gap:.8rem;margin:1.3rem 0;}
+.signup-divider::before,.signup-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.signup-divider span{font-size:.74rem;color:var(--text3);font-weight:500;white-space:nowrap;}
+.back-link{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:1.2rem;font-size:.82rem;color:var(--primary);font-weight:600;cursor:pointer;transition:opacity var(--trans);}
+.back-link:hover{opacity:.7;}
+.signup-guest-note{text-align:center;font-size:.73rem;color:var(--text3);margin-top:.6rem;line-height:1.5;}
+.signup-guest-note i{color:var(--orange);margin-right:.25rem;}
+.field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(14,11,31,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease;}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal{background:#fff;border-radius:20px;padding:2.25rem;width:100%;max-width:520px;box-shadow:var(--shadow-lg);transform:translateY(18px) scale(.97);transition:all .25s ease;position:relative;max-height:90vh;overflow-y:auto;}
+.modal-overlay.open .modal{transform:translateY(0) scale(1);}
+.modal-close-btn{position:absolute;top:1rem;right:1rem;width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all var(--trans);}
+.modal-close-btn:hover{background:var(--surface2);}
+.modal-ico{width:50px;height:50px;background:var(--primary-pale);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;color:var(--primary);margin-bottom:1.2rem;}
+.modal h3{font-family:'Sora',sans-serif;font-size:1.28rem;font-weight:700;color:var(--text);margin-bottom:.32rem;}
+.modal > p, .modal-step > p{font-size:.84rem;color:var(--text3);margin-bottom:1.4rem;line-height:1.6;}
+.modal-step{display:none;}
+.modal-step.active{display:block;}
+.modal-back{font-size:.79rem;color:var(--primary);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem;margin-top:.7rem;}
+.modal-back:hover{opacity:.72;}
+.otp-row{display:flex;gap:.55rem;justify-content:center;margin-bottom:.9rem;}
+.otp-input{width:50px;height:56px;text-align:center;border:1.5px solid #E4E0F4;border-radius:11px;font-size:1.35rem;font-family:'Sora',sans-serif;font-weight:700;color:var(--text);background:#fff;transition:all var(--trans);}
+.otp-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,.1);}
+.otp-resend{text-align:center;font-size:.77rem;color:var(--text3);margin-bottom:.5rem;}
+.otp-resend a{color:var(--primary);font-weight:600;cursor:pointer;}
+.success-ico{width:58px;height:58px;background:var(--green-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.55rem;color:var(--green);margin:0 auto 1.2rem;}
+.pwd-strength{height:4px;border-radius:99px;background:var(--border);margin-top:.45rem;overflow:hidden;}
+.pwd-strength-fill{height:100%;border-radius:99px;transition:width .3s ease,background .3s ease;width:0%;}
+
+/* Toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:#1A1232;color:#fff;padding:.72rem 1.35rem;border-radius:99px;font-size:.83rem;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;transition:all .3s ease;z-index:600;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast i{margin-right:.4rem;color:#34D399;}
+
+/* DASHBOARD */
+.app-shell{display:flex;min-height:100vh;}.app-shell.hidden{display:none!important;}
+.sidebar{width:var(--sidebar-w);background:var(--dark);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.sb-head{padding:1.5rem 1.4rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.7rem;}
+.sb-logo-ico{width:36px;height:36px;background:linear-gradient(135deg,#7C3AED,#A855F7);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;box-shadow:0 5px 14px rgba(124,58,237,.5);flex-shrink:0;}
+.sb-logo-txt{font-family:'Sora',sans-serif;font-size:.8rem;font-weight:600;color:rgba(255,255,255,.85);line-height:1.3;}
+.sb-logo-txt small{display:block;font-size:.62rem;font-weight:400;color:rgba(255,255,255,.33);letter-spacing:.07em;text-transform:uppercase;}
+.sb-user{padding:.9rem 1.4rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.75rem;}
+.sb-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;color:#fff;}
+.sb-uname{font-size:.86rem;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-urole{font-size:.7rem;color:rgba(255,255,255,.37);}
+.sb-online{width:7px;height:7px;background:var(--green);border-radius:50%;flex-shrink:0;}
+.sb-nav{flex:1;padding:.8rem 0;overflow-y:auto;}
+.nav-sec{padding:.45rem 1.4rem .25rem;font-size:.6rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:rgba(255,255,255,.24);}
+.nav-item{display:flex;align-items:center;gap:.8rem;padding:.68rem 1.4rem;margin:.08rem .65rem;border-radius:9px;cursor:pointer;transition:all var(--trans);color:rgba(255,255,255,.42);font-size:.86rem;font-weight:500;}
+.nav-item i{width:17px;text-align:center;font-size:.9rem;}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.78);}
+.nav-item.active{background:rgba(124,58,237,.25);color:#A78BFA;box-shadow:inset 0 0 0 1px rgba(124,58,237,.3);}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;font-weight:700;padding:.12rem .42rem;border-radius:99px;}
+.sb-foot{padding:.9rem 1.4rem;border-top:1px solid rgba(255,255,255,.06);}
+.btn-logout{width:100%;display:flex;align-items:center;justify-content:center;gap:.55rem;padding:.68rem;border-radius:9px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:rgba(239,68,68,.8);font-size:.83rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all var(--trans);}
+.btn-logout:hover{background:rgba(239,68,68,.18);color:#F87171;}
+.main-area{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{height:var(--header-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.75rem;position:sticky;top:0;z-index:50;gap:1rem;box-shadow:0 1px 0 var(--border),0 4px 14px rgba(0,0,0,.04);}
+.tb-title{flex:1;}
+.tb-title h1{font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);letter-spacing:-.015em;}
+.tb-title p{font-size:.77rem;color:var(--text3);margin-top:.04rem;}
+.tb-search{display:flex;align-items:center;gap:.55rem;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:.5rem .95rem;transition:all var(--trans);width:210px;}
+.tb-search:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,.08);width:255px;}
+.tb-search i{color:var(--text3);font-size:.82rem;}
+.tb-search input{border:none;background:transparent;font-size:.83rem;color:var(--text);font-family:'DM Sans',sans-serif;width:100%;}
+.tb-search input:focus{outline:none;}
+.tb-search input::placeholder{color:var(--text3);}
+.tb-actions{display:flex;align-items:center;gap:.5rem;}
+.ico-btn{width:38px;height:38px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all var(--trans);color:var(--text2);position:relative;font-size:.9rem;}
+.ico-btn:hover{background:var(--primary-pale);border-color:var(--primary-light);color:var(--primary);}
+.ico-btn .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--surface);}
+.tb-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;}
+/* Profile dropdown */
+.profile-wrap{position:relative;}
+.profile-dropdown{position:absolute;top:calc(100% + 10px);right:0;width:220px;background:#fff;border:1.5px solid var(--border);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:500;overflow:hidden;display:none;}
+.profile-dropdown.open{display:block;animation:dropIn .15s ease;}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.pd-header{padding:14px 16px 10px;border-bottom:1px solid var(--border);}
+.pd-name{font-weight:700;font-size:.88rem;color:var(--text);}
+.pd-email{font-size:.73rem;color:var(--text3);margin-top:2px;}
+.pd-item{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:.84rem;color:var(--text2);cursor:pointer;transition:background .15s;}
+.pd-item:hover{background:var(--surface2);}
+.pd-item i{width:16px;text-align:center;font-size:.8rem;}
+.pd-item.danger{color:var(--red);}
+.pd-item.danger:hover{background:#FEE2E2;}
+.pd-divider{height:1px;background:var(--border);margin:4px 0;}
+.page-content{flex:1;padding:1.6rem 1.75rem 3rem;}
+.stats-row{display:grid;gap:1.1rem;margin-bottom:1.5rem;}
+.c3{grid-template-columns:repeat(3,1fr);}.c4{grid-template-columns:repeat(4,1fr);}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.3rem 1.4rem;display:flex;flex-direction:column;gap:.55rem;transition:all var(--trans);position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;}
+.stat-card.v::after{background:linear-gradient(90deg,var(--primary),var(--purple));}
+.stat-card.o::after{background:linear-gradient(90deg,var(--orange),#FCD34D);}
+.stat-card.g::after{background:linear-gradient(90deg,var(--green),#34D399);}
+.stat-card.r::after{background:linear-gradient(90deg,var(--red),#F87171);}
+.stat-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.sc-top{display:flex;align-items:center;justify-content:space-between;}
+.sc-lbl{font-size:.75rem;font-weight:600;color:var(--text3);letter-spacing:.02em;text-transform:uppercase;}
+.sc-ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.sc-ico.v{background:var(--primary-pale);color:var(--primary);}.sc-ico.o{background:var(--orange-pale);color:var(--orange);}.sc-ico.g{background:var(--green-pale);color:var(--green);}.sc-ico.r{background:var(--red-pale);color:var(--red);}
+.sc-val{font-family:'Sora',sans-serif;font-size:1.9rem;font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1;}
+.sc-sub{font-size:.77rem;color:var(--text3);display:flex;align-items:center;gap:.3rem;}
+.up{color:var(--green);}.dn{color:var(--red);}
+.pbar{width:100%;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-top:.15rem;}
+.pfill{height:100%;border-radius:99px;}
+.pfill.v{background:linear-gradient(90deg,var(--primary),var(--primary-light));}.pfill.g{background:linear-gradient(90deg,var(--green),#34D399);}.pfill.o{background:linear-gradient(90deg,var(--orange),#FCD34D);}
+.sec-row{display:grid;gap:1.1rem;margin-bottom:1.5rem;}
+.c2{grid-template-columns:1fr 1fr;}.c23{grid-template-columns:2fr 3fr;}.c32{grid-template-columns:3fr 2fr;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.card-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ch-left{display:flex;align-items:center;gap:.65rem;}
+.ch-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;}
+.ch-ico.v{background:var(--primary-pale);color:var(--primary);}.ch-ico.o{background:var(--orange-pale);color:var(--orange);}.ch-ico.g{background:var(--green-pale);color:var(--green);}.ch-ico.r{background:var(--red-pale);color:var(--red);}
+.ch-title{font-family:'Sora',sans-serif;font-size:.94rem;font-weight:600;color:var(--text);}
+.ch-sub{font-size:.72rem;color:var(--text3);margin-top:.04rem;}
+.ch-action{font-size:.76rem;color:var(--primary);font-weight:600;cursor:pointer;padding:.3rem .7rem;border-radius:7px;transition:background var(--trans);}
+.ch-action:hover{background:var(--primary-pale);}
+.card-body{padding:1.2rem 1.4rem;}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .72rem;border-radius:99px;font-size:.73rem;font-weight:600;}
+.badge i{font-size:.48rem;}
+.badge.low{background:var(--green-pale);color:#065F46;}.badge.medium{background:var(--orange-pale);color:#92400E;}.badge.high{background:var(--red-pale);color:#991B1B;}.badge.info{background:var(--primary-pale);color:#4C1D95;}.badge.blue{background:#DBEAFE;color:#1E40AF;}
+.rbar-list{display:flex;flex-direction:column;gap:.85rem;}
+.rbar-row{display:flex;align-items:center;gap:.9rem;}
+.rbar-lbl{width:95px;font-size:.8rem;font-weight:500;color:var(--text2);flex-shrink:0;}
+.rbar-track{flex:1;height:26px;background:var(--surface2);border-radius:7px;overflow:hidden;}
+.rbar-fill{height:100%;border-radius:7px;display:flex;align-items:center;padding:0 .7rem;font-size:.75rem;font-weight:600;color:#fff;}
+.rbar-cnt{width:75px;text-align:right;font-size:.77rem;color:var(--text3);font-weight:500;flex-shrink:0;}
+.s-row{display:flex;align-items:center;gap:.9rem;padding:.85rem 1.4rem;border-bottom:1px solid var(--border);transition:background var(--trans);}
+.s-row:last-child{border-bottom:none;}.s-row:hover{background:var(--surface2);}
+.s-av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:.84rem;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--primary),var(--purple));}
+.s-info{flex:1;min-width:0;}
+.s-name{font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:.1rem;}
+.s-meta{font-size:.75rem;color:var(--text3);}
+.s-gpa{font-family:'Sora',sans-serif;font-size:.9rem;font-weight:700;color:var(--text);text-align:right;}
+.s-gpa-l{font-size:.66rem;color:var(--text3);text-align:right;}
+.alert{display:flex;gap:.8rem;align-items:flex-start;padding:.9rem 1.1rem;border-radius:var(--radius-sm);margin-bottom:.7rem;border:1px solid transparent;}
+.alert:last-child{margin-bottom:0;}
+.alert.info{background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.15);}
+.alert.warning{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.2);}
+.alert.danger{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.18);}
+.alert.success{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.18);}
+.alert i{font-size:1.05rem;margin-top:.12rem;flex-shrink:0;}
+.alert.info i{color:var(--primary);}.alert.warning i{color:var(--orange);}.alert.danger i{color:var(--red);}.alert.success i{color:var(--green);}
+.alert-title{font-size:.86rem;font-weight:600;color:var(--text);margin-bottom:.18rem;}
+.alert-body{font-size:.78rem;color:var(--text2);line-height:1.5;}
+.dtable{width:100%;border-collapse:collapse;}
+.dtable th{padding:.7rem 1.4rem;text-align:left;font-size:.72rem;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;background:var(--surface2);border-bottom:1px solid var(--border);}
+.dtable td{padding:.85rem 1.4rem;font-size:.83rem;color:var(--text2);border-bottom:1px solid var(--border);}
+.dtable tr:last-child td{border-bottom:none;}.dtable tr:hover td{background:var(--surface2);}
+.tab-bar{display:flex;gap:.22rem;padding:.9rem 1.4rem .5rem;border-bottom:1px solid var(--border);}
+.tab-btn{padding:.44rem .85rem;border-radius:8px;border:none;font-size:.79rem;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all var(--trans);background:transparent;color:var(--text3);}
+.tab-btn.active{background:var(--primary-pale);color:var(--primary);font-weight:600;}
+.tab-btn:hover:not(.active){background:var(--surface2);color:var(--text);}
+
+/* Notif panel */
+.notif-overlay{position:fixed;inset:0;z-index:200;background:rgba(14,11,31,.4);backdrop-filter:blur(3px);display:none;}
+.notif-overlay.open{display:block;}
+.notif-panel{position:fixed;top:0;right:-380px;bottom:0;width:360px;background:var(--surface);z-index:201;box-shadow:var(--shadow-lg);transition:right .3s ease;display:flex;flex-direction:column;}
+.notif-panel.open{right:0;}
+.notif-head{padding:1.3rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.notif-head h3{font-family:'Sora',sans-serif;font-size:.97rem;font-weight:700;color:var(--text);}
+.nclose{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all var(--trans);}
+.nclose:hover{background:var(--surface2);}
+.notif-list{flex:1;overflow-y:auto;padding:.9rem;display:flex;flex-direction:column;gap:.6rem;}
+.notif-item{padding:.85rem .95rem;border-radius:var(--radius-sm);border:1px solid var(--border);display:flex;gap:.7rem;cursor:pointer;transition:all var(--trans);}
+.notif-item:hover{background:var(--surface2);}
+.notif-item.unread{border-color:rgba(124,58,237,.25);background:rgba(124,58,237,.03);}
+.ndot{width:7px;height:7px;border-radius:50%;background:var(--primary);margin-top:.42rem;flex-shrink:0;}
+.ndot.read{background:var(--border);}
+.n-title{font-size:.83rem;font-weight:600;color:var(--text);margin-bottom:.13rem;}
+.n-body{font-size:.76rem;color:var(--text3);line-height:1.45;}
+.n-time{font-size:.68rem;color:var(--text3);margin-top:.38rem;}
+
+/* Upload & Scan */
+.upload-zone{border:2.5px dashed var(--border);border-radius:var(--radius);padding:2.5rem;text-align:center;cursor:pointer;transition:all var(--trans);background:var(--surface2);}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--primary);background:var(--primary-pale);}
+.upload-zone i{font-size:2.2rem;color:var(--primary-light);margin-bottom:.8rem;display:block;}
+.upload-zone h3{font-family:'Sora',sans-serif;font-size:1rem;font-weight:600;margin-bottom:.3rem;}
+.upload-zone p{font-size:.82rem;color:var(--text3);}
+.upload-zone input[type=file]{display:none;}
+.text-box{width:100%;min-height:120px;padding:.9rem;border:1.5px solid var(--border);border-radius:11px;font-family:'DM Sans',sans-serif;font-size:.88rem;resize:vertical;background:#fff;color:var(--text);}
+.text-box:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,.09);}
+.gauge-row{display:flex;gap:1.2rem;margin-bottom:1.2rem;}
+.gauge{flex:1;text-align:center;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);position:relative;overflow:hidden;}
+.gauge::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;}
+.gauge.v::after{background:var(--primary);}.gauge.r::after{background:var(--red);}.gauge.o::after{background:var(--orange);}.gauge.g::after{background:var(--green);}
+.gauge-val{font-family:'Sora',sans-serif;font-size:2rem;font-weight:700;line-height:1;}
+.gauge-lbl{font-size:.75rem;color:var(--text3);margin-top:.3rem;font-weight:500;text-transform:uppercase;letter-spacing:.03em;}
+.gauge-sub{font-size:.72rem;color:var(--text3);margin-top:.2rem;}
+.heatmap-bar{display:flex;flex-direction:column;gap:.35rem;max-height:350px;overflow-y:auto;padding-right:.3rem;}
+.hm-sent{padding:.55rem .8rem;border-radius:8px;font-size:.82rem;line-height:1.5;color:var(--text);border-left:4px solid;transition:all var(--trans);}
+.hm-sent:hover{transform:translateX(3px);}
+.hm-sent .hm-score{font-family:'Sora',sans-serif;font-weight:700;font-size:.7rem;float:right;padding:.15rem .5rem;border-radius:99px;color:#fff;}
+.src-list{display:flex;flex-direction:column;gap:.6rem;}
+.src-item{display:flex;gap:.7rem;padding:.7rem .9rem;border:1px solid var(--border);border-radius:var(--radius-sm);transition:all var(--trans);}
+.src-item:hover{border-color:var(--primary-light);background:var(--primary-pale);}
+.src-ico{width:36px;height:36px;border-radius:8px;background:var(--primary-pale);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.src-info{flex:1;min-width:0;}.src-title{font-size:.84rem;font-weight:600;color:var(--text);}.src-meta{font-size:.72rem;color:var(--text3);margin-top:.1rem;}.src-pct{font-family:'Sora',sans-serif;font-weight:700;font-size:.88rem;}
+.scan-loading{text-align:center;padding:3rem;}.scan-loading i{font-size:2rem;color:var(--primary);animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.risk-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .85rem;border-radius:99px;font-size:.78rem;font-weight:700;font-family:'Sora',sans-serif;}
+.risk-badge.low{background:var(--green-pale);color:#065F46;}.risk-badge.medium{background:var(--orange-pale);color:#92400E;}.risk-badge.high{background:var(--red-pale);color:#991B1B;}.risk-badge.critical{background:#991B1B;color:#fff;}
+.rec-list{display:flex;flex-direction:column;gap:.6rem;}
+.rec-item{display:flex;gap:.7rem;padding:.7rem;border-radius:var(--radius-sm);border:1px solid var(--border);}
+.rec-item.critical{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.04);}.rec-item.high{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.04);}
+.or-divider{text-align:center;font-size:.78rem;color:var(--text3);margin:.8rem 0;font-weight:500;}
+
+/* Doc Preview in Faculty */
+.doc-preview{background:#F9F8FF;border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.2rem;max-height:200px;overflow-y:auto;font-size:.84rem;line-height:1.7;color:var(--text2);font-family:'DM Sans',sans-serif;white-space:pre-wrap;word-break:break-word;}
+
+/* AI Reference Source Bar */
+.ref-bar{display:flex;flex-direction:column;gap:.7rem;}
+.ref-item{display:flex;gap:.85rem;padding:.85rem 1rem;border:1px solid var(--border);border-radius:var(--radius-sm);transition:all var(--trans);background:var(--surface);position:relative;overflow:hidden;}
+.ref-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--primary),var(--purple));border-radius:3px 0 0 3px;}
+.ref-item:hover{border-color:var(--primary-light);background:var(--primary-pale);box-shadow:var(--shadow);transform:translateX(2px);}
+.ref-ico{width:38px;height:38px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.ref-ico.pdf{background:rgba(239,68,68,.1);color:var(--red);}
+.ref-ico.web{background:var(--primary-pale);color:var(--primary);}
+.ref-body{flex:1;min-width:0;}
+.ref-title{font-size:.86rem;font-weight:600;color:var(--text);margin-bottom:.18rem;line-height:1.4;}
+.ref-title a{color:var(--primary);text-decoration:none;}
+.ref-title a:hover{text-decoration:underline;}
+.ref-authors{font-size:.74rem;color:var(--text3);margin-bottom:.12rem;}
+.ref-abstract{font-size:.75rem;color:var(--text2);line-height:1.5;margin-top:.2rem;}
+.ref-meta{display:flex;align-items:center;gap:.5rem;margin-top:.35rem;flex-wrap:wrap;}
+.ref-tag{font-size:.66rem;font-weight:600;padding:.18rem .55rem;border-radius:99px;}
+.ref-tag.year{background:#EDE9FE;color:#5B21B6;}
+.ref-tag.src{background:#D1FAE5;color:#065F46;}
+.ref-tag.type{background:#FEF3C7;color:#92400E;}
+.ref-tag.pdf{background:#FEE2E2;color:#991B1B;}
+.ref-doi{font-size:.66rem;color:var(--text3);font-family:monospace;}
+.ref-search-bar{display:flex;gap:.6rem;margin-bottom:.8rem;}
+.ref-search-inp{flex:1;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:#fff;color:var(--text);}
+.ref-search-inp:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,.08);}
+.ref-search-btn{padding:.6rem 1rem;border:none;border-radius:9px;background:linear-gradient(135deg,var(--primary),var(--purple));color:#fff;font-size:.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all var(--trans);white-space:nowrap;}
+.ref-search-btn:hover{opacity:.88;transform:translateY(-1px);}
+.ref-loading{text-align:center;padding:2rem;color:var(--text3);font-size:.84rem;}
+.ref-loading i{display:block;font-size:1.5rem;color:var(--primary);margin-bottom:.6rem;animation:spin 1s linear infinite;}
+.ref-source-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;color:var(--text3);padding:.2rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:99px;margin-bottom:.7rem;}
+
+/* User cards for admin */
+.user-card{display:flex;align-items:center;gap:.9rem;padding:.9rem 1.4rem;border-bottom:1px solid var(--border);transition:background var(--trans);}
+.user-card:last-child{border-bottom:none;}
+.user-card:hover{background:var(--surface2);}
+.user-av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;color:#fff;}
+.user-info{flex:1;min-width:0;}
+.user-name{font-size:.88rem;font-weight:600;color:var(--text);}
+.user-meta{font-size:.75rem;color:var(--text3);}
+.user-role-tag{padding:.22rem .65rem;border-radius:99px;font-size:.7rem;font-weight:700;display:inline-block;}
+.user-role-tag.student{background:rgba(124,58,237,.09);color:var(--primary);}
+.user-role-tag.faculty{background:rgba(245,158,11,.1);color:var(--orange);}
+.user-role-tag.admin{background:rgba(16,185,129,.1);color:var(--green);}
+
+/* Settings form */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:1rem 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.setting-info h4{font-size:.88rem;font-weight:600;color:var(--text);}
+.setting-info p{font-size:.77rem;color:var(--text3);margin-top:.1rem;}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:#D1D5DB;border-radius:99px;cursor:pointer;transition:.3s;}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+.toggle input:checked+.toggle-slider{background:var(--primary);}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px);}
+
+@media(max-width:1100px){.c4{grid-template-columns:repeat(2,1fr);}.c23,.c32{grid-template-columns:1fr;}.gauge-row{flex-wrap:wrap;}}
+@media(max-width:820px){.auth-brand{display:none;}.auth-content{width:100%;padding:2rem 1.5rem;}.sidebar{display:none;}.main-area{margin-left:0;}.c3{grid-template-columns:1fr 1fr;}.c2{grid-template-columns:1fr;}.topbar{padding:0 1rem;}.page-content{padding:1rem;}.gauge-row{flex-direction:column;}}
+@media(max-width:500px){.c3,.c4{grid-template-columns:1fr;}.tb-search{display:none;}}
+</style>
+</head>
+<body>
+
+<!-- ROLE SELECTION -->
+<div class="auth-screen" id="pageRole">
+  <div class="auth-brand">
+    <div class="brand-logo"><div class="brand-logo-icon"><i class="fas fa-graduation-cap"></i></div><div class="brand-logo-text">Academic Resilience<small>Platform v2.3</small></div></div>
+    <div class="brand-body">
+      <div class="brand-eyebrow">Welcome</div>
+      <h1 class="brand-headline">Empowering<br><span>academic success</span><br>through insight.</h1>
+      <p class="brand-sub">A unified platform for students, faculty, and administrators to monitor and improve academic outcomes in real time.</p>
+    </div>
+    <div class="brand-pills">
+      <div class="brand-pill"><div class="bpi v"><i class="fas fa-user-graduate"></i></div><div><strong>425</strong><span>Students enrolled</span></div></div>
+      <div class="brand-pill"><div class="bpi o"><i class="fas fa-chalkboard-teacher"></i></div><div><strong>52</strong><span>Active faculty members</span></div></div>
+      <div class="brand-pill"><div class="bpi r"><i class="fas fa-copy"></i></div><div><strong>4.2%</strong><span>Plagiarism rate . this semester</span></div></div>
+    </div>
+  </div>
+  <div class="auth-content">
+    <div class="auth-box">
+      <div class="auth-head"><div class="auth-eyebrow">Get started</div><h2>Who are you?</h2><p>Select your role to access your personalised dashboard.</p></div>
+      <div class="role-cards">
+        <div class="role-card s" onclick="selectRole('student')"><div class="rc-ico"><i class="fas fa-user-graduate"></i></div><div class="rc-txt"><h3>Student</h3><p>Track your academic journey &amp; progress</p></div><i class="fas fa-arrow-right rc-arr"></i></div>
+        <div class="role-card f" onclick="selectRole('faculty')"><div class="rc-ico"><i class="fas fa-chalkboard-teacher"></i></div><div class="rc-txt"><h3>Faculty</h3><p>Monitor student progress &amp; risk levels</p></div><i class="fas fa-arrow-right rc-arr"></i></div>
+        <div class="role-card a" onclick="selectRole('admin')"><div class="rc-ico"><i class="fas fa-user-shield"></i></div><div class="rc-txt"><h3>Administrator</h3><p>Manage platform settings &amp; analytics</p></div><i class="fas fa-arrow-right rc-arr"></i></div>
+      </div>
+      <p class="auth-footnote"><i class="fas fa-lock" style="font-size:.68rem"></i> Secure access <span>.</span> FERPA Compliant <span>.</span> End-to-end encrypted</p>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="auth-screen hidden" id="pageLogin">
+  <div class="auth-brand">
+    <div class="brand-logo"><div class="brand-logo-icon"><i class="fas fa-graduation-cap"></i></div><div class="brand-logo-text">Academic Resilience<small>Platform v2.3</small></div></div>
+    <div class="brand-body">
+      <div class="brand-eyebrow">Sign in</div>
+      <h1 class="brand-headline">Welcome<br>back to your<br><span>workspace.</span></h1>
+      <p class="brand-sub">Sign in to continue monitoring academic performance with AI-powered insights and real-time alerts.</p>
+    </div>
+    <div class="brand-pills">
+      <div class="brand-pill"><div class="bpi v"><i class="fas fa-shield-alt"></i></div><div><strong>Encrypted</strong><span>All data secured end-to-end</span></div></div>
+      <div class="brand-pill"><div class="bpi r"><i class="fas fa-copy"></i></div><div><strong>4.2%</strong><span>Plagiarism rate . this semester</span></div></div>
+      <div class="brand-pill"><div class="bpi g"><i class="fas fa-robot"></i></div><div><strong>AI Model v2.3</strong><span>+12% prediction accuracy</span></div></div>
+    </div>
+  </div>
+  <div class="auth-content">
+    <div class="auth-box">
+      <div class="auth-head"><div class="auth-eyebrow">Sign in</div><h2>Welcome back</h2><p>Enter your credentials to access your dashboard.</p></div>
+      <span class="role-chip s" id="roleChip"><i class="fas fa-user-graduate"></i><span id="roleChipText">Student</span></span>
+      <form id="loginForm" autocomplete="off">
+        <div class="field">
+          <label>Email address</label>
+          <div class="finput"><i class="fas fa-envelope lft"></i><input type="email" placeholder="you@institution.edu" required></div>
+        </div>
+        <div class="field">
+          <div class="field-row"><label style="margin-bottom:0">Password</label><span class="field-link" onclick="openForgot()"><i class="fas fa-key" style="font-size:.7rem;margin-right:.25rem"></i>Forgot password?</span></div>
+          <div class="finput"><i class="fas fa-lock lft"></i><input type="password" id="pwdInput" placeholder="Enter your password" required><i class="fas fa-eye rgt" id="pwdToggle" onclick="togglePwd()"></i></div>
+        </div>
+        <button type="submit" class="btn-prim"><span>Sign In</span><i class="fas fa-arrow-right"></i></button>
+        <button type="button" class="btn-signup" id="btnSignupStudent" onclick="openSignup()"><i class="fas fa-user-plus"></i><span>Sign Up as Student</span></button>
+      </form>
+      <div class="back-link" onclick="goBack()"><i class="fas fa-arrow-left"></i> Back to role selection</div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT SIGN UP -->
+<div class="auth-screen hidden" id="pageSignup">
+  <div class="auth-brand">
+    <div class="brand-logo"><div class="brand-logo-icon"><i class="fas fa-graduation-cap"></i></div><div class="brand-logo-text">Academic Resilience<small>Platform v2.3</small></div></div>
+    <div class="brand-body">
+      <div class="brand-eyebrow">Join us</div>
+      <h1 class="brand-headline">Start your<br><span>academic journey</span><br>with confidence.</h1>
+      <p class="brand-sub">Create your student account to access personalised insights, progress tracking, and AI-powered support.</p>
+    </div>
+    <div class="brand-pills">
+      <div class="brand-pill"><div class="bpi v"><i class="fas fa-chart-line"></i></div><div><strong>AI Insights</strong><span>Personalised academic recommendations</span></div></div>
+      <div class="brand-pill"><div class="bpi o"><i class="fas fa-bell"></i></div><div><strong>Smart Alerts</strong><span>Early risk detection &amp; notifications</span></div></div>
+      <div class="brand-pill"><div class="bpi g"><i class="fas fa-trophy"></i></div><div><strong>Track Progress</strong><span>Monitor your growth in real time</span></div></div>
+    </div>
+  </div>
+  <div class="auth-content">
+    <div class="auth-box">
+      <div class="auth-head"><div class="auth-eyebrow">Create account</div><h2>Student Sign Up</h2><p>Fill in your details to request access as a guest student.</p></div>
+      <form id="signupForm" autocomplete="off">
+        <div class="field"><label>Full Name</label><div class="finput"><i class="fas fa-user lft"></i><input type="text" id="signupName" placeholder="Enter your full name" required></div></div>
+        <div class="field"><label>Email Address</label><div class="finput"><i class="fas fa-envelope lft"></i><input type="email" id="signupEmail" placeholder="you@institution.edu" required></div></div>
+        <div class="field"><label>Phone Number</label><div class="finput"><i class="fas fa-phone lft"></i><input type="tel" id="signupPhone" placeholder="+91 XXXXX XXXXX" required></div></div>
+        <div class="field-row-2">
+          <div class="field"><label>Password</label><div class="finput"><i class="fas fa-lock lft"></i><input type="password" id="signupPwd" placeholder="Min. 8 characters" required oninput="checkSignupStrength(this)"></div><div class="pwd-strength"><div class="pwd-strength-fill" id="signupStrengthBar"></div></div></div>
+          <div class="field"><label>Confirm Password</label><div class="finput"><i class="fas fa-lock lft"></i><input type="password" id="signupConfirmPwd" placeholder="Repeat password" required></div></div>
+        </div>
+        <button type="submit" class="btn-prim"><i class="fas fa-paper-plane"></i><span>Submit Request</span></button>
+      </form>
+      <div class="signup-guest-note"><i class="fas fa-info-circle"></i>Your account will be created as a <strong>Guest Student</strong>. An administrator will review and approve your access.</div>
+      <div class="back-link" onclick="backToLogin()"><i class="fas fa-arrow-left"></i> Back to Login</div>
+    </div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal">
+    <button class="modal-close-btn" onclick="closeForgot()"><i class="fas fa-times"></i></button>
+    <div class="modal-step active" id="fp1">
+      <div class="modal-ico"><i class="fas fa-key"></i></div>
+      <h3>Forgot Password?</h3>
+      <p>No worries. Enter your institutional email and we'll send a 6-digit verification code.</p>
+      <div class="field"><label>Institutional email</label><div class="finput"><i class="fas fa-envelope lft"></i><input type="email" id="fpEmail" placeholder="you@institution.edu"></div></div>
+      <button class="btn-prim" onclick="fpSendCode()" style="margin-top:.4rem"><i class="fas fa-paper-plane"></i><span>Send Verification Code</span></button>
+      <div class="modal-back" onclick="closeForgot()"><i class="fas fa-arrow-left"></i> Back to sign in</div>
+    </div>
+    <div class="modal-step" id="fp2">
+      <div class="modal-ico"><i class="fas fa-mobile-alt"></i></div>
+      <h3>Check Your Email</h3>
+      <p id="fpSentMsg">A 6-digit code has been sent. It expires in 10 minutes.</p>
+      <div class="otp-row">
+        <input class="otp-input" maxlength="1" oninput="otpMove(this,0)" onkeydown="otpBack(event,0)">
+        <input class="otp-input" maxlength="1" oninput="otpMove(this,1)" onkeydown="otpBack(event,1)">
+        <input class="otp-input" maxlength="1" oninput="otpMove(this,2)" onkeydown="otpBack(event,2)">
+        <input class="otp-input" maxlength="1" oninput="otpMove(this,3)" onkeydown="otpBack(event,3)">
+        <input class="otp-input" maxlength="1" oninput="otpMove(this,4)" onkeydown="otpBack(event,4)">
+        <input class="otp-input" maxlength="1" oninput="otpMove(this,5)" onkeydown="otpBack(event,5)">
+      </div>
+      <p class="otp-resend">Didn't receive it? <a onclick="fpResend()">Resend code</a></p>
+      <button class="btn-prim" onclick="fpVerify()"><i class="fas fa-check-circle"></i><span>Verify Code</span></button>
+      <div class="modal-back" onclick="fpGoTo(1)"><i class="fas fa-arrow-left"></i> Back</div>
+    </div>
+    <div class="modal-step" id="fp3">
+      <div class="modal-ico"><i class="fas fa-lock-open"></i></div>
+      <h3>Set New Password</h3>
+      <p>Choose a strong new password. Must be at least 8 characters long.</p>
+      <div class="field"><label>New password</label><div class="finput"><i class="fas fa-lock lft"></i><input type="password" id="newPwd" placeholder="Min. 8 characters" oninput="checkStrength(this)"></div><div class="pwd-strength"><div class="pwd-strength-fill" id="strengthBar"></div></div></div>
+      <div class="field"><label>Confirm new password</label><div class="finput"><i class="fas fa-lock lft"></i><input type="password" id="confirmPwd" placeholder="Repeat your password"></div></div>
+      <button class="btn-prim" onclick="fpReset()"><i class="fas fa-save"></i><span>Reset Password</span></button>
+      <div class="modal-back" onclick="fpGoTo(2)"><i class="fas fa-arrow-left"></i> Back</div>
+    </div>
+    <div class="modal-step" id="fp4">
+      <div class="success-ico"><i class="fas fa-check"></i></div>
+      <h3 style="text-align:center;margin-bottom:.35rem">Password Reset!</h3>
+      <p style="text-align:center">Your password has been updated successfully. Sign in with your new credentials.</p>
+      <button class="btn-prim" onclick="closeForgot()"><i class="fas fa-sign-in-alt"></i><span>Back to Sign In</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Document View Modal (Faculty) -->
+<div class="modal-overlay" id="docViewModal">
+  <div class="modal" style="max-width:680px">
+    <button class="modal-close-btn" onclick="closeDocModal()"><i class="fas fa-times"></i></button>
+    <div class="modal-ico" style="background:var(--primary-pale)"><i class="fas fa-file-alt"></i></div>
+    <h3 id="docModalTitle">Document Review</h3>
+    <p id="docModalMeta" style="margin-bottom:.8rem"></p>
+    <div class="gauge-row" id="docModalGauges" style="margin-bottom:1rem"></div>
+    <div style="margin-bottom:.6rem;font-size:.82rem;font-weight:600;color:var(--text2)"> Document Content Preview</div>
+    <div class="doc-preview" id="docModalContent">Loading...</div>
+    <div style="margin-top:1rem;margin-bottom:.6rem;font-size:.82rem;font-weight:600;color:var(--text2)"> Plagiarism Heatmap</div>
+    <div class="heatmap-bar" id="docModalHeatmap" style="max-height:180px"></div>
+    <div style="margin-top:1rem;margin-bottom:.6rem;font-size:.82rem;font-weight:600;color:var(--text2)"> AI Content Breakdown</div>
+    <div id="docModalAI"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg">Done!</span></div>
+
+<!-- Notification panel -->
+<div class="notif-overlay" id="notifOvr" onclick="closeNotif()"></div>
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-head"><h3><i class="fas fa-bell" style="color:var(--primary);margin-right:.45rem"></i>Notifications</h3><button class="nclose" onclick="closeNotif()"><i class="fas fa-times"></i></button></div>
+  <div class="notif-list">
+    <div class="notif-item unread"><div class="ndot"></div><div><div class="n-title">High Risk Alert â€" Michael Brown</div><div class="n-body">GPA dropped to 2.5. Attendance 65%. Immediate intervention suggested.</div><div class="n-time">15 minutes ago</div></div></div>
+    <div class="notif-item unread"><div class="ndot"></div><div><div class="n-title">AI Model v2.3 Ready</div><div class="n-body">New prediction model available â€" 12% improved accuracy.</div><div class="n-time">1 hour ago</div></div></div>
+    <div class="notif-item"><div class="ndot read"></div><div><div class="n-title">Weekly Report Generated</div><div class="n-body">This week's academic resilience report is ready for review.</div><div class="n-time">3 hours ago</div></div></div>
+    <div class="notif-item"><div class="ndot read"></div><div><div class="n-title">Intervention Scheduled</div><div class="n-body">Meeting with James Wilson confirmed for Friday 3 PM.</div><div class="n-time">Yesterday</div></div></div>
+  </div>
+</div>
+
+<!-- ──────────────────     STUDENT DASHBOARD────────────────── -->
+<div class="app-shell hidden" id="dashStudent">
+  <aside class="sidebar">
+    <div class="sb-head"><div class="sb-logo-ico"><i class="fas fa-shield-alt"></i></div><div class="sb-logo-txt">PlagGuard<small>AI Content Detector</small></div></div>
+    <div class="sb-user"><div class="sb-av" style="background:linear-gradient(135deg,#7C3AED,#A855F7)" id="stuAvatar">AJ</div><div style="flex:1;min-width:0"><div class="sb-uname" id="stuName">Alex Johnson</div><div class="sb-urole">Student</div></div><div class="sb-online"></div></div>
+    <nav class="sb-nav">
+      <div class="nav-sec">Detection</div>
+      <div class="nav-item active" id="stuNav-scan" onclick="switchStuTab('scan',this)"><i class="fas fa-search"></i>Scan Document</div>
+      <div class="nav-item" id="stuNav-history" onclick="switchStuTab('history',this)"><i class="fas fa-history"></i>Scan History</div>
+      <div class="nav-sec">Academic</div>
+      <div class="nav-item" id="stuNav-subjects" onclick="switchStuTab('subjects',this)"><i class="fas fa-book-open"></i>My Subjects</div>
+      <div class="nav-item" id="stuNav-reports" onclick="switchStuTab('reports',this)"><i class="fas fa-chart-bar"></i>My Reports</div>
+      <div class="nav-sec">Account</div>
+      <div class="nav-item" id="stuNav-settings" onclick="switchStuTab('settings',this)"><i class="fas fa-cog"></i>Settings</div>
+    </nav>
+    <div class="sb-foot"><button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i>Sign Out</button></div>
+  </aside>
+  <div class="main-area">
+    <div class="topbar">
+      <div class="tb-title"><h1 id="studentGreet">Good morning!</h1><p id="studentDate">Loading...</p></div>
+      <div class="tb-search"><i class="fas fa-search"></i><input type="text" placeholder="Search documents..." oninput="stuSearchFilter(this.value)"></div>
+      <div class="tb-actions">
+        <div class="ico-btn" onclick="openNotif()"><i class="fas fa-bell"></i><span class="dot"></span></div>
+        <div class="ico-btn" onclick="switchStuTab('settings',document.getElementById('stuNav-settings'))"><i class="fas fa-cog"></i></div>
+        <div class="profile-wrap">
+          <div class="tb-avatar" style="background:linear-gradient(135deg,#7C3AED,#A855F7)" id="stuAvatarTop" onclick="toggleProfileDrop('stuDrop')">AJ</div>
+          <div class="profile-dropdown" id="stuDrop">
+            <div class="pd-header"><div class="pd-name" id="stuDropName">Student</div><div class="pd-email" id="stuDropEmail"></div></div>
+            <div class="pd-item" onclick="closeProfileDrop();switchStuTab('settings',document.getElementById('stuNav-settings'))"><i class="fas fa-user-cog"></i>Account Settings</div>
+            <div class="pd-divider"></div>
+            <div class="pd-item" onclick="closeProfileDrop();switchAccount()"><i class="fas fa-exchange-alt"></i>Switch User</div>
+            <div class="pd-item danger" onclick="closeProfileDrop();logout()"><i class="fas fa-sign-out-alt"></i>Sign Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- ────────────────── SCAN TAB ────────────────── -->
+      <div id="stuTab-scan">
+        <div class="card" style="margin-bottom:1.2rem">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-cloud-upload-alt"></i></div><div><div class="ch-title">Scan Document</div><div class="ch-sub">Upload or paste text to check for plagiarism &amp; AI content</div></div></div></div>
+          <div class="card-body">
+            <div style="margin-bottom:1rem">
+              <label style="font-size:.82rem;font-weight:600;color:var(--text);display:block;margin-bottom:.4rem">Select Subject</label>
+              <select id="subjectSelect" style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:11px;font-family:'DM Sans',sans-serif;font-size:.88rem;background:#fff;color:var(--text);cursor:pointer;">
+                <option value="">-- Choose Subject --</option>
+                <option value="maths">Mathematics</option>
+                <option value="physics">Physics</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="cs">Computer Science</option>
+                <option value="biology">Biology</option>
+              </select>
+            </div>
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+              <input type="file" id="fileInput" accept=".txt,.pdf,.docx" onchange="handleFile(this)">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <h3>Drop your document here</h3>
+              <p>Supports TXT, PDF, DOCX &middot; Max 10MB</p>
+            </div>
+            <div class="or-divider">â€" - or paste your text below - â€"</div>
+            <textarea class="text-box" id="scanTextInput" placeholder="Paste your essay, assignment, or research paper text here..."></textarea>
+            <button class="btn-prim" onclick="runScan()" id="scanBtn" style="margin-top:.8rem"><i class="fas fa-search"></i><span>Analyze Document</span></button>
+          </div>
+        </div>
+        <div id="scanLoading" class="hidden"><div class="scan-loading"><i class="fas fa-spinner"></i><p style="margin-top:1rem;color:var(--text3)">Uploading and processing document... Please wait.</p></div></div>
+        <div id="scanResults" class="hidden">
+          <div class="card" style="margin-bottom:1.2rem">
+            <div class="card-body" style="text-align:center;padding:2.5rem 1.5rem">
+              <div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#10B981,#34D399);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem"><i class="fas fa-check" style="font-size:1.8rem;color:#fff"></i></div>
+              <h2 style="color:var(--text);margin-bottom:.4rem">Document Submitted Successfully!</h2>
+              <p style="color:var(--text3);margin-bottom:1.2rem" id="submitMsg">Your document has been submitted for review. Your faculty will be able to view the results.</p>
+              <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap">
+                <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:11px;padding:.8rem 1.3rem;min-width:130px"><div style="font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Subject</div><div style="font-size:1rem;font-weight:600;color:var(--text)" id="submitSubject">--</div></div>
+                <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:11px;padding:.8rem 1.3rem;min-width:130px"><div style="font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px">File</div><div style="font-size:1rem;font-weight:600;color:var(--text)" id="submitFile">--</div></div>
+                <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:11px;padding:.8rem 1.3rem;min-width:130px"><div style="font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Status</div><div style="font-size:1rem;font-weight:600;color:#10B981">Submitted âœ"</div></div>
+              </div>
+              <button class="btn-ghost" onclick="switchStuTab('history',document.getElementById('stuNav-history'))" style="margin-top:1rem;max-width:240px"><i class="fas fa-history"></i>View Submission History</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────────────────── HISTORY TAB ────────────────── -->
+      <div id="stuTab-history" class="hidden">
+        <div class="card" id="stuHistoryCard">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico o"><i class="fas fa-history"></i></div><div><div class="ch-title">Submission History</div><div class="ch-sub">Your uploaded documents</div></div></div><div class="ch-action" onclick="sortStuHistory()">Sort â†-</div></div>
+          <table class="dtable"><thead><tr><th>Date</th><th>Subject</th><th>Document</th><th>Status</th></tr></thead>
+          <tbody id="stuHistoryBody"><tr><td colspan="4" style="text-align:center;color:var(--text3);padding:1.5rem">No submissions yet. Upload a document to get started.</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- ────────────────── SUBJECTS TAB ────────────────── -->
+      <div id="stuTab-subjects" class="hidden">
+        <div class="stats-row c3" style="margin-bottom:1.2rem">
+          <div class="stat-card v"><div class="sc-top"><div class="sc-lbl">Total Docs</div><div class="sc-ico v"><i class="fas fa-file-alt"></i></div></div><div class="sc-val" id="stuTotalDocs">0</div><div class="sc-sub">Submitted this semester</div></div>
+          <div class="stat-card g"><div class="sc-top"><div class="sc-lbl">Clean Docs</div><div class="sc-ico g"><i class="fas fa-check-circle"></i></div></div><div class="sc-val" id="stuCleanDocs">0</div><div class="sc-sub">Below 30% plagiarism</div></div>
+          <div class="stat-card r"><div class="sc-top"><div class="sc-lbl">Flagged</div><div class="sc-ico r"><i class="fas fa-flag"></i></div></div><div class="sc-val" id="stuFlaggedDocs">0</div><div class="sc-sub">Needs attention</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico g"><i class="fas fa-book-open"></i></div><div><div class="ch-title">My Subjects</div><div class="ch-sub">Current semester &middot; 5 subjects</div></div></div></div>
+          <table class="dtable">
+            <thead><tr><th>Subject</th><th>Code</th><th>Docs Submitted</th><th>Avg Originality</th><th>Status</th></tr></thead>
+            <tbody id="stuSubjectsBody">
+              <tr><td><span style="display:inline-flex;align-items:center;gap:.45rem"><span style="background:#EDE9FE;color:#6D28D9;padding:.18rem .52rem;border-radius:6px;font-size:.75rem;font-weight:700">MTH</span>Mathematics</span></td><td>MTH301</td><td id="stuCnt-maths">0</td><td id="stuOrig-maths">--</td><td id="stuStat-maths"><span class="badge low">No Scans</span></td></tr>
+              <tr><td><span style="display:inline-flex;align-items:center;gap:.45rem"><span style="background:#CFFAFE;color:#0E7490;padding:.18rem .52rem;border-radius:6px;font-size:.75rem;font-weight:700">PHY</span>Physics</span></td><td>PHY201</td><td id="stuCnt-physics">0</td><td id="stuOrig-physics">--</td><td id="stuStat-physics"><span class="badge low">No Scans</span></td></tr>
+              <tr><td><span style="display:inline-flex;align-items:center;gap:.45rem"><span style="background:#D1FAE5;color:#065F46;padding:.18rem .52rem;border-radius:6px;font-size:.75rem;font-weight:700">CHM</span>Chemistry</span></td><td>CHM202</td><td id="stuCnt-chemistry">0</td><td id="stuOrig-chemistry">--</td><td id="stuStat-chemistry"><span class="badge low">No Scans</span></td></tr>
+              <tr><td><span style="display:inline-flex;align-items:center;gap:.45rem"><span style="background:#F3E8FF;color:#6D28D9;padding:.18rem .52rem;border-radius:6px;font-size:.75rem;font-weight:700">CS</span>Computer Science</span></td><td>CSE301</td><td id="stuCnt-cs">0</td><td id="stuOrig-cs">--</td><td id="stuStat-cs"><span class="badge low">No Scans</span></td></tr>
+              <tr><td><span style="display:inline-flex;align-items:center;gap:.45rem"><span style="background:#FEF3C7;color:#92400E;padding:.18rem .52rem;border-radius:6px;font-size:.75rem;font-weight:700">BIO</span>Biology</span></td><td>BIO201</td><td id="stuCnt-biology">0</td><td id="stuOrig-biology">--</td><td id="stuStat-biology"><span class="badge low">No Scans</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ────────────────── REPORTS TAB ────────────────── -->
+      <div id="stuTab-reports" class="hidden">
+        <div class="card" style="margin-bottom:1.2rem">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-chart-bar"></i></div><div><div class="ch-title">My Submission Reports</div><div class="ch-sub">Originality overview per subject</div></div></div></div>
+          <div class="card-body" id="stuReportsBody">
+            <p style="color:var(--text3);text-align:center;padding:2rem">Submit documents to generate your reports.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────────────────── SETTINGS TAB ────────────────── -->
+      <div id="stuTab-settings" class="hidden">
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-cog"></i></div><div><div class="ch-title">Account Settings</div><div class="ch-sub">Manage your preferences</div></div></div></div>
+          <div class="card-body">
+            <div class="setting-row"><div class="setting-info"><h4>Email Notifications</h4><p>Receive alerts when your submissions are reviewed</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+            <div class="setting-row"><div class="setting-info"><h4>Risk Alerts</h4><p>Get notified when a document is flagged as high risk</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+            <div class="setting-row"><div class="setting-info"><h4>Weekly Summary</h4><p>Receive weekly academic performance summary</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+            <div style="margin-top:1.2rem">
+              <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.4rem">Display Name</label>
+              <div style="display:flex;gap:.6rem"><input type="text" id="stuDisplayName" style="flex:1;padding:.7rem .9rem;border:1.5px solid var(--border);border-radius:11px;font-family:'DM Sans',sans-serif;font-size:.88rem" placeholder="Your display name"><button onclick="saveStuSettings()" style="padding:.7rem 1.2rem;border:none;border-radius:11px;background:var(--primary);color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">Save</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────────     FACULTY DASHBOARD────────────────── -->
+<div class="app-shell hidden" id="dashFaculty">
+  <aside class="sidebar">
+    <div class="sb-head"><div class="sb-logo-ico"><i class="fas fa-shield-alt"></i></div><div class="sb-logo-txt">PlagGuard<small>Faculty Portal</small></div></div>
+    <div class="sb-user"><div class="sb-av" style="background:linear-gradient(135deg,#F59E0B,#FCD34D);color:#78350F">Dr</div><div style="flex:1;min-width:0"><div class="sb-uname">Dr. Sarah Smith</div><div class="sb-urole">Faculty . Computer Science</div></div><div class="sb-online"></div></div>
+    <nav class="sb-nav">
+      <div class="nav-sec">Review</div>
+      <div class="nav-item active" onclick="switchFacultyTab('overview',this)"><i class="fas fa-home"></i>Overview</div>
+      <div class="nav-item" onclick="switchFacultyTab('submissions',this)"><i class="fas fa-file-alt"></i>Submissions<span class="nav-badge" id="facSubCount">0</span></div>
+      <div class="nav-item" onclick="switchFacultyTab('flagged',this)"><i class="fas fa-exclamation-circle"></i>Flagged<span class="nav-badge" id="facFlagCount">0</span></div>
+      <div class="nav-sec">Analysis</div>
+      <div class="nav-item" onclick="switchFacultyTab('analyse',this)"><i class="fas fa-microscope"></i>Analyse</div>
+      <div class="nav-item" onclick="switchFacultyTab('reports',this)"><i class="fas fa-chart-bar"></i>Reports</div>
+      <div class="nav-item" onclick="switchFacultyTab('settings',this)"><i class="fas fa-cog"></i>Settings</div>
+    </nav>
+    <div class="sb-foot"><button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i>Sign Out</button></div>
+  </aside>
+  <div class="main-area">
+    <div class="topbar">
+      <div class="tb-title"><h1>Faculty Review Dashboard</h1><p id="facultyDate">Loading...</p></div>
+      <div class="tb-search"><i class="fas fa-search"></i><input type="text" placeholder="Search submissions" oninput="facSearchFilter(this.value)"></div>
+      <div class="tb-actions">
+        <div class="ico-btn" onclick="openNotif()"><i class="fas fa-bell"></i><span class="dot"></span></div>
+        <div class="profile-wrap">
+          <div class="tb-avatar" style="background:linear-gradient(135deg,#F59E0B,#FCD34D);color:#78350F;font-size:.73rem" id="facAvatarTop" onclick="toggleProfileDrop('facDrop')">Dr</div>
+          <div class="profile-dropdown" id="facDrop">
+            <div class="pd-header"><div class="pd-name" id="facDropName">Faculty</div><div class="pd-email" id="facDropEmail"></div></div>
+            <div class="pd-item" onclick="closeProfileDrop()"><i class="fas fa-user-cog"></i>Account Settings</div>
+            <div class="pd-divider"></div>
+            <div class="pd-item" onclick="closeProfileDrop();switchAccount()"><i class="fas fa-exchange-alt"></i>Switch User</div>
+            <div class="pd-item danger" onclick="closeProfileDrop();logout()"><i class="fas fa-sign-out-alt"></i>Sign Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- ────────────────── OVERVIEW TAB ────────────────── -->
+      <div id="facTab-overview">
+        <div class="stats-row c4">
+          <div class="stat-card v"><div class="sc-top"><div class="sc-lbl">Total Submissions</div><div class="sc-ico v"><i class="fas fa-file-alt"></i></div></div><div class="sc-val" id="facTotalSub">0</div><div class="sc-sub">Documents scanned</div></div>
+          <div class="stat-card r"><div class="sc-top"><div class="sc-lbl">Flagged</div><div class="sc-ico r"><i class="fas fa-exclamation-triangle"></i></div></div><div class="sc-val" id="facFlagged">0</div><div class="sc-sub">Require review</div></div>
+          <div class="stat-card o"><div class="sc-top"><div class="sc-lbl">Avg Originality</div><div class="sc-ico o"><i class="fas fa-percentage"></i></div></div><div class="sc-val" id="facAvgOrig">--</div><div class="sc-sub">Across all scans</div></div>
+          <div class="stat-card g"><div class="sc-top"><div class="sc-lbl">AI Flagged</div><div class="sc-ico g"><i class="fas fa-robot"></i></div></div><div class="sc-val" id="facAiFlagged">0</div><div class="sc-sub">AI content detected</div></div>
+        </div>
+        <div class="card" style="margin-bottom:1.2rem">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-list"></i></div><div><div class="ch-title">Student Submissions</div><div class="ch-sub">All scanned documents</div></div></div><div class="ch-action" onclick="loadFacultyData()">Refresh â†'</div></div>
+          <table class="dtable" id="facTable">
+            <thead><tr><th>Student</th><th>Document</th><th>Plagiarism</th><th>AI Score</th><th>Risk</th><th>Subject</th><th>Action</th></tr></thead>
+            <tbody id="facTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:2rem">No submissions yet.</td></tr></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico r"><i class="fas fa-flag"></i></div><div><div class="ch-title">Flagged Documents</div><div class="ch-sub">High risk submissions requiring attention</div></div></div></div>
+          <div class="card-body" id="facFlaggedArea"><div class="alert info"><i class="fas fa-info-circle"></i><div><div class="alert-title">All Clear</div><div class="alert-body">No flagged documents found.</div></div></div></div>
+        </div>
+      </div>
+
+      <!-- ────────────────── SUBMISSIONS TAB ────────────────── -->
+      <div id="facTab-submissions" class="hidden">
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-file-alt"></i></div><div><div class="ch-title">All Submissions</div><div class="ch-sub">Complete list of student documents</div></div></div><div class="ch-action" onclick="loadFacultyData()">Refresh â†'</div></div>
+          <table class="dtable">
+            <thead><tr><th>Student</th><th>Document</th><th>Plagiarism</th><th>AI Score</th><th>Risk</th><th>Subject</th><th>Review</th></tr></thead>
+            <tbody id="facSubsTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:2rem">No submissions yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ────────────────── FLAGGED TAB ────────────────── -->
+      <div id="facTab-flagged" class="hidden">
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico r"><i class="fas fa-exclamation-circle"></i></div><div><div class="ch-title">Flagged Documents</div><div class="ch-sub">Requires immediate attention</div></div></div></div>
+          <div class="card-body" id="facFlaggedArea2"><div class="alert info"><i class="fas fa-info-circle"></i><div><div class="alert-title">All Clear</div><div class="alert-body">No flagged documents found.</div></div></div></div>
+        </div>
+      </div>
+
+      <!-- ────────────────── ANALYSE TAB ────────────────── -->
+      <div id="facTab-analyse" class="hidden">
+        <div class="card" style="margin-bottom:1.2rem">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-microscope"></i></div><div><div class="ch-title">Document Analyser</div><div class="ch-sub">Select a student submission to view full analysis</div></div></div></div>
+          <div class="card-body">
+            <select id="facDocSelect" onchange="loadFacDocAnalysis()" style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:11px;font-family:'DM Sans',sans-serif;font-size:.88rem;background:#fff;color:var(--text);cursor:pointer;">
+              <option value="">-- Select a submission --</option>
+            </select>
+          </div>
+        </div>
+        <div id="facAnalyseResults" class="hidden">
+          <div class="gauge-row" id="facGaugeRow" style="margin-bottom:1.2rem"></div>
+          <div class="card" style="margin-bottom:1.2rem">
+            <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-file-text"></i></div><div><div class="ch-title">Document Content</div><div class="ch-sub" id="facDocPreviewSub">Full text</div></div></div></div>
+            <div class="card-body"><div class="doc-preview" id="facDocPreview">No content available.</div></div>
+          </div>
+          <div class="sec-row c2" style="margin-bottom:1.2rem">
+            <div class="card">
+              <div class="card-head"><div class="ch-left"><div class="ch-ico o"><i class="fas fa-thermometer-half"></i></div><div><div class="ch-title">Plagiarism Heatmap</div><div class="ch-sub" id="facHeatmapSub">Sentence-level analysis</div></div></div></div>
+              <div class="card-body"><div class="heatmap-bar" id="facHeatmapArea"></div></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div class="ch-left"><div class="ch-ico r"><i class="fas fa-book"></i></div><div><div class="ch-title">Matched Sources</div><div class="ch-sub" id="facSourcesSub">Corpus matches</div></div></div></div>
+              <div class="card-body"><div class="src-list" id="facSourcesArea"><p style="color:var(--text3);text-align:center">No matched sources.</p></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="ch-left"><div class="ch-ico g"><i class="fas fa-robot"></i></div><div><div class="ch-title">AI Content Breakdown</div><div class="ch-sub">Paragraph-level AI probability</div></div></div></div>
+            <div class="card-body"><div id="facAiParaArea"></div></div>
+          </div>
+        </div>
+        <!-- ────────────────── AI REFERENCE SOURCE BAR (always visible) ────────────────── -->
+        <div class="card" style="margin-top:1.1rem" id="facRefCard">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-globe"></i></div><div><div class="ch-title">AI Reference Sources</div><div class="ch-sub" id="facRefSub">Search real online academic papers by topic or subject</div></div></div><div class="ch-action" onclick="refreshFacReferences()">Refresh â†'</div></div>
+          <div class="card-body">
+            <div class="ref-search-bar">
+              <input class="ref-search-inp" id="facRefSearchInp" placeholder="Type keywords, e.g. neural networks, organic chemistry" onkeydown="if(event.key==='Enter')searchFacReferences()">
+              <select id="facRefSubjectSel" style="padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.83rem;background:#fff;color:var(--text);">
+                <option value="">All Subjects</option>
+                <option value="maths">Mathematics</option>
+                <option value="physics">Physics</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="cs">Computer Science</option>
+                <option value="biology">Biology</option>
+              </select>
+              <button class="ref-search-btn" onclick="searchFacReferences()"><i class="fas fa-search" style="margin-right:.35rem"></i>Search Papers</button>
+            </div>
+            <div id="facRefBar"><div style="text-align:center;color:var(--text3);padding:1.5rem;font-size:.83rem"><i class="fas fa-globe" style="display:block;font-size:1.5rem;color:var(--primary-light);margin-bottom:.5rem;opacity:.5"></i>Select a document above or type keywords to find matching academic papers.</div></div>
+          </div>
+        </div>
+        <div id="facAnalyseEmpty" style="text-align:center;padding:3rem;color:var(--text3)">
+          <i class="fas fa-microscope" style="font-size:2.5rem;margin-bottom:1rem;display:block;opacity:.3"></i>
+          <p>Select a document above to view the full plagiarism and AI analysis.</p>
+        </div>
+      </div>
+
+      <!-- ────────────────── REPORTS TAB ────────────────── -->
+      <div id="facTab-reports" class="hidden">
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-chart-bar"></i></div><div><div class="ch-title">Analytics Report</div><div class="ch-sub">Subject-wise summary</div></div></div></div>
+          <div class="card-body" id="facReportsArea"><p style="color:var(--text3);text-align:center;padding:2rem">Submit documents to generate reports.</p></div>
+        </div>
+      </div>
+
+      <!-- ────────────────── SETTINGS TAB ────────────────── -->
+      <div id="facTab-settings" class="hidden">
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico o"><i class="fas fa-cog"></i></div><div><div class="ch-title">Faculty Settings</div><div class="ch-sub">Review thresholds and notifications</div></div></div></div>
+          <div class="card-body">
+            <div class="setting-row"><div class="setting-info"><h4>High-Risk Alerts</h4><p>Get notified when plagiarism exceeds 60%</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+            <div class="setting-row"><div class="setting-info"><h4>AI Content Alerts</h4><p>Notify when AI score exceeds 50%</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+            <div class="setting-row"><div class="setting-info"><h4>Daily Digest</h4><p>Receive daily summary of student submissions</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+            <div style="margin-top:1rem">
+              <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.4rem">Plagiarism Threshold (%)</label>
+              <input type="number" value="40" min="10" max="90" style="padding:.7rem .9rem;border:1.5px solid var(--border);border-radius:11px;font-family:'DM Sans',sans-serif;font-size:.88rem;width:200px">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────────     ADMIN DASHBOARD────────────────── -->
+<div class="app-shell hidden" id="dashAdmin">
+  <aside class="sidebar">
+    <div class="sb-head"><div class="sb-logo-ico"><i class="fas fa-shield-alt"></i></div><div class="sb-logo-txt">PlagGuard<small>Admin Console</small></div></div>
+    <div class="sb-user"><div class="sb-av" style="background:linear-gradient(135deg,#10B981,#34D399);color:#064E3B">AD</div><div style="flex:1;min-width:0"><div class="sb-uname">Admin User</div><div class="sb-urole">System Administrator</div></div><div class="sb-online"></div></div>
+    <nav class="sb-nav">
+      <div class="nav-sec">Overview</div>
+      <div class="nav-item active" onclick="switchAdminTab('dashboard',this)"><i class="fas fa-home"></i>Dashboard</div>
+      <div class="nav-item" onclick="switchAdminTab('users',this)"><i class="fas fa-users"></i>All Users<span class="nav-badge" id="admUserCount">0</span></div>
+      <div class="nav-item" onclick="switchAdminTab('approvals',this)"><i class="fas fa-user-check"></i>Approvals<span class="nav-badge" id="admPendingBadge" style="background:var(--orange)">0</span></div>
+      <div class="nav-sec">User Management</div>
+      <div class="nav-item" onclick="switchAdminTab('addstudent',this)"><i class="fas fa-user-graduate"></i>Add Student</div>
+      <div class="nav-item" onclick="switchAdminTab('addfaculty',this)"><i class="fas fa-chalkboard-teacher"></i>Add Faculty</div>
+      <div class="nav-sec">System</div>
+      <div class="nav-item" onclick="switchAdminTab('scanlogs',this)"><i class="fas fa-server"></i>Scan Logs</div>
+      <div class="nav-item" onclick="switchAdminTab('reports',this)"><i class="fas fa-chart-bar"></i>Reports</div>
+      <div class="nav-item" onclick="switchAdminTab('aimodel',this)"><i class="fas fa-robot"></i>AI Model</div>
+      <div class="nav-item" onclick="switchAdminTab('settings',this)"><i class="fas fa-cog"></i>Settings</div>
+    </nav>
+    <div class="sb-foot"><button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i>Sign Out</button></div>
+  </aside>
+  <div class="main-area">
+    <div class="topbar">
+      <div class="tb-title"><h1>Admin Dashboard</h1><p id="adminDate">Loading...</p></div>
+      <div class="tb-search"><i class="fas fa-search"></i><input type="text" placeholder="Search scans, users" oninput="admSearchFilter(this.value)"></div>
+      <div class="tb-actions">
+        <div class="ico-btn" onclick="openNotif()"><i class="fas fa-bell"></i><span class="dot"></span></div>
+        <div class="profile-wrap">
+          <div class="tb-avatar" style="background:linear-gradient(135deg,#10B981,#34D399);color:#064E3B;font-size:.73rem" id="admAvatarTop" onclick="toggleProfileDrop('admDrop')">AD</div>
+          <div class="profile-dropdown" id="admDrop">
+            <div class="pd-header"><div class="pd-name" id="admDropName">Administrator</div><div class="pd-email" id="admDropEmail"></div></div>
+            <div class="pd-item" onclick="closeProfileDrop();switchAdminTab('settings',null)"><i class="fas fa-user-cog"></i>Account Settings</div>
+            <div class="pd-divider"></div>
+            <div class="pd-item" onclick="closeProfileDrop();switchAccount()"><i class="fas fa-exchange-alt"></i>Switch User</div>
+            <div class="pd-item danger" onclick="closeProfileDrop();logout()"><i class="fas fa-sign-out-alt"></i>Sign Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- ────────────────── DASHBOARD TAB ────────────────── -->
+      <div id="admTab-dashboard">
+        <div class="stats-row c4" id="adminStats">
+          <div class="stat-card v"><div class="sc-top"><div class="sc-lbl">Total Scans</div><div class="sc-ico v"><i class="fas fa-search"></i></div></div><div class="sc-val" id="admScans">0</div><div class="sc-sub">Documents processed</div></div>
+          <div class="stat-card r"><div class="sc-top"><div class="sc-lbl">Flagged</div><div class="sc-ico r"><i class="fas fa-flag"></i></div></div><div class="sc-val" id="admFlagged">0</div><div class="sc-sub">High/critical risk</div></div>
+          <div class="stat-card o"><div class="sc-top"><div class="sc-lbl">Avg Plagiarism</div><div class="sc-ico o"><i class="fas fa-copy"></i></div></div><div class="sc-val" id="admAvgPlag">0%</div><div class="sc-sub">Across all scans</div></div>
+          <div class="stat-card g"><div class="sc-top"><div class="sc-lbl">Total Users</div><div class="sc-ico g"><i class="fas fa-users"></i></div></div><div class="sc-val" id="admTotalUsers">0</div><div class="sc-sub">Registered accounts</div></div>
+        </div>
+        <div class="sec-row c2" style="margin-bottom:1.2rem">
+          <div class="stat-card v" style="flex-direction:row;align-items:center;gap:1rem"><div class="sc-ico v" style="width:48px;height:48px"><i class="fas fa-user-graduate" style="font-size:1.1rem"></i></div><div><div class="sc-lbl">Students</div><div class="sc-val" id="admStudents">0</div></div></div>
+          <div class="stat-card o" style="flex-direction:row;align-items:center;gap:1rem"><div class="sc-ico o" style="width:48px;height:48px"><i class="fas fa-chalkboard-teacher" style="font-size:1.1rem"></i></div><div><div class="sc-lbl">Faculty</div><div class="sc-val" id="admFaculty">0</div></div></div>
+        </div>
+        <div class="card" style="margin-bottom:1.2rem">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-history"></i></div><div><div class="ch-title">Recent Scans</div><div class="ch-sub">Latest document analyses</div></div></div><div class="ch-action" onclick="loadAdminData()">Refresh â†'</div></div>
+          <table class="dtable"><thead><tr><th>Student</th><th>Document</th><th>Plagiarism</th><th>AI Score</th><th>Risk</th><th>Time</th></tr></thead>
+          <tbody id="admTableBody"><tr><td colspan="6" style="text-align:center;color:var(--text3);padding:2rem">No scans yet.</td></tr></tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico g"><i class="fas fa-heartbeat"></i></div><div><div class="ch-title">System Health</div><div class="ch-sub">AI model status</div></div></div></div>
+          <div class="card-body" id="adminHealthArea"><div class="alert info"><i class="fas fa-spinner fa-spin"></i><div><div class="alert-title">Checking system health...</div><div class="alert-body">Connecting to backend API.</div></div></div></div>
+        </div>
+        <!-- ────────────────── ADMIN AI REFERENCE SOURCE BAR (Dashboard) ────────────────── -->
+        <div class="card" style="margin-top:1.1rem" id="admRefCardDash">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-globe"></i></div><div><div class="ch-title">AI Reference Source Library</div><div class="ch-sub" id="admRefSubDash">Search real academic papers from Semantic Scholar</div></div></div><div class="ch-action" onclick="searchAdmRefDash()">Search &#8594;</div></div>
+          <div class="card-body">
+            <div class="ref-search-bar">
+              <input class="ref-search-inp" id="admRefSearchInpDash" placeholder="e.g. deep learning, quantum physics, plagiarism detection" onkeydown="if(event.key==='Enter')searchAdmRefDash()">
+              <select id="admRefSubjectSelDash" style="padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.83rem;background:#fff;color:var(--text);">
+                <option value="">All Subjects</option>
+                <option value="maths">Mathematics</option>
+                <option value="physics">Physics</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="cs">Computer Science</option>
+                <option value="biology">Biology</option>
+              </select>
+              <button class="ref-search-btn" onclick="searchAdmRefDash()"><i class="fas fa-search" style="margin-right:.35rem"></i>Search Papers</button>
+            </div>
+            <div id="admRefBarDash"><div style="text-align:center;color:var(--text3);padding:1.5rem;font-size:.83rem"><i class="fas fa-book-open" style="display:block;font-size:1.5rem;color:var(--primary-light);margin-bottom:.5rem;opacity:.5"></i>Enter a topic or select a subject to search online academic reference papers.</div></div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ────────────────── USERS TAB ────────────────── -->
+      <div id="admTab-users" class="hidden">
+        <div class="stats-row c3" style="margin-bottom:1.2rem">
+          <div class="stat-card v"><div class="sc-top"><div class="sc-lbl">Total Users</div><div class="sc-ico v"><i class="fas fa-users"></i></div></div><div class="sc-val" id="admUserTotal">0</div><div class="sc-sub">All roles</div></div>
+          <div class="stat-card o"><div class="sc-top"><div class="sc-lbl">Students</div><div class="sc-ico o"><i class="fas fa-user-graduate"></i></div></div><div class="sc-val" id="admUserStudents">0</div><div class="sc-sub">Registered students</div></div>
+          <div class="stat-card g"><div class="sc-top"><div class="sc-lbl">Faculty</div><div class="sc-ico g"><i class="fas fa-chalkboard-teacher"></i></div></div><div class="sc-val" id="admUserFaculty">0</div><div class="sc-sub">Active faculty</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-users"></i></div><div><div class="ch-title">User Directory</div><div class="ch-sub">All registered accounts</div></div></div><div class="ch-action" onclick="loadAdminUsers()">Refresh â†'</div></div>
+          <table class="dtable">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead>
+            <tbody id="admUsersBody"><tr><td colspan="5" style="text-align:center;color:var(--text3);padding:2rem">Loading users...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- \u2500\u2500 APPROVALS TAB \u2500\u2500 -->
+      <div id="admTab-approvals" class="hidden">
+        <div class="stats-row c3" style="margin-bottom:1.2rem">
+          <div class="stat-card o"><div class="sc-top"><div class="sc-lbl">Pending</div><div class="sc-ico o"><i class="fas fa-clock"></i></div></div><div class="sc-val" id="admPendingCount">0</div><div class="sc-sub">Awaiting review</div></div>
+          <div class="stat-card g"><div class="sc-top"><div class="sc-lbl">Approved</div><div class="sc-ico g"><i class="fas fa-check-circle"></i></div></div><div class="sc-val" id="admApprovedCount">0</div><div class="sc-sub">This session</div></div>
+          <div class="stat-card r"><div class="sc-top"><div class="sc-lbl">Rejected</div><div class="sc-ico r"><i class="fas fa-times-circle"></i></div></div><div class="sc-val" id="admRejectedCount">0</div><div class="sc-sub">This session</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="ch-left"><div class="ch-ico o"><i class="fas fa-user-clock"></i></div><div><div class="ch-title">Pending Sign-up Requests</div><div class="ch-sub">Students who self-registered - approve or reject access</div></div></div>
+            <div class="ch-action" onclick="loadApprovals()">Refresh &rarr;</div>
+          </div>
+          <div class="card-body" id="approvalsBody">
+            <div class="alert info"><i class="fas fa-spinner fa-spin"></i><div><div class="alert-title">Loading requests...</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- \u2500\u2500 ADD STUDENT TAB \u2500\u2500 -->
+      <div id="admTab-addstudent" class="hidden">
+        <div style="max-width:600px;margin:0 auto">
+          <div class="card" style="margin-bottom:1.4rem">
+            <div class="card-head">
+              <div class="ch-left">
+                <div class="ch-ico v"><i class="fas fa-user-graduate"></i></div>
+                <div><div class="ch-title">Add New Student</div><div class="ch-sub">Create a student account - they can log in immediately</div></div>
+              </div>
+            </div>
+            <div class="card-body">
+              <form id="addStudentForm" autocomplete="off">
+                <div class="field" style="margin-bottom:.95rem">
+                  <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Full Name</label>
+                  <div class="finput"><i class="fas fa-user lft"></i><input type="text" id="astu-name" placeholder="Student full name" required></div>
+                </div>
+                <div class="field" style="margin-bottom:.95rem">
+                  <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Email Address</label>
+                  <div class="finput"><i class="fas fa-envelope lft"></i><input type="email" id="astu-email" placeholder="student@institution.edu" required></div>
+                </div>
+                <div class="field" style="margin-bottom:.95rem">
+                  <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Phone Number <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+                  <div class="finput"><i class="fas fa-phone lft"></i><input type="tel" id="astu-phone" placeholder="+91 XXXXX XXXXX"></div>
+                </div>
+                <div class="field-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.95rem">
+                  <div class="field" style="margin-bottom:0">
+                    <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Password</label>
+                    <div class="finput"><i class="fas fa-lock lft"></i><input type="password" id="astu-pwd" placeholder="Min. 8 characters" required></div>
+                  </div>
+                  <div class="field" style="margin-bottom:0">
+                    <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Confirm Password</label>
+                    <div class="finput"><i class="fas fa-lock lft"></i><input type="password" id="astu-cpwd" placeholder="Repeat password" required></div>
+                  </div>
+                </div>
+                <button type="submit" class="btn-prim" id="addStuBtn" style="margin-top:.4rem">
+                  <i class="fas fa-user-plus"></i><span>Create Student Account</span>
+                </button>
+              </form>
+            </div>
+          </div>
+          <!-- Student session log -->
+          <div class="card">
+            <div class="card-head">
+              <div class="ch-left"><div class="ch-ico g"><i class="fas fa-check-double"></i></div><div><div class="ch-title">Students Added This Session</div><div class="ch-sub">Live log</div></div></div>
+              <div class="ch-action" onclick="loadAdminUsers()">View All &rarr;</div>
+            </div>
+            <div class="card-body" id="addedStudentsLog"><p style="color:var(--text3);text-align:center;font-size:.84rem">No students added yet.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADD FACULTY TAB ── -->
+      <div id="admTab-addfaculty" class="hidden">
+        <div style="max-width:600px;margin:0 auto">
+          <div class="card" style="margin-bottom:1.4rem">
+            <div class="card-head">
+              <div class="ch-left">
+                <div class="ch-ico o"><i class="fas fa-chalkboard-teacher"></i></div>
+                <div><div class="ch-title">Add New Faculty</div><div class="ch-sub">Create a faculty account - they can log in immediately</div></div>
+              </div>
+            </div>
+            <div class="card-body">
+              <form id="addFacultyForm" autocomplete="off">
+                <div class="field" style="margin-bottom:.95rem">
+                  <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Full Name</label>
+                  <div class="finput"><i class="fas fa-user lft"></i><input type="text" id="afac-name" placeholder="e.g. Dr. Jane Smith" required></div>
+                </div>
+                <div class="field" style="margin-bottom:.95rem">
+                  <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Email Address</label>
+                  <div class="finput"><i class="fas fa-envelope lft"></i><input type="email" id="afac-email" placeholder="faculty@institution.edu" required></div>
+                </div>
+                <div class="field" style="margin-bottom:.95rem">
+                  <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Phone Number <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+                  <div class="finput"><i class="fas fa-phone lft"></i><input type="tel" id="afac-phone" placeholder="+91 XXXXX XXXXX"></div>
+                </div>
+                <div class="field" style="margin-bottom:.95rem">
+                  <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Department / Subject</label>
+                  <div class="finput"><i class="fas fa-book lft"></i><input type="text" id="afac-dept" placeholder="e.g. Computer Science" required></div>
+                </div>
+                <div class="field-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.95rem">
+                  <div class="field" style="margin-bottom:0">
+                    <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Password</label>
+                    <div class="finput"><i class="fas fa-lock lft"></i><input type="password" id="afac-pwd" placeholder="Min. 8 characters" required></div>
+                  </div>
+                  <div class="field" style="margin-bottom:0">
+                    <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.42rem">Confirm Password</label>
+                    <div class="finput"><i class="fas fa-lock lft"></i><input type="password" id="afac-cpwd" placeholder="Repeat password" required></div>
+                  </div>
+                </div>
+                <button type="submit" class="btn-prim" id="addFacBtn" style="background:linear-gradient(135deg,#D97706,#F59E0B);box-shadow:0 4px 16px rgba(217,119,6,.35);margin-top:.4rem">
+                  <i class="fas fa-chalkboard-teacher"></i><span>Create Faculty Account</span>
+                </button>
+              </form>
+            </div>
+          </div>
+          <!-- Faculty session log -->
+          <div class="card">
+            <div class="card-head">
+              <div class="ch-left"><div class="ch-ico g"><i class="fas fa-check-double"></i></div><div><div class="ch-title">Faculty Added This Session</div><div class="ch-sub">Live log</div></div></div>
+              <div class="ch-action" onclick="loadAdminUsers()">View All &rarr;</div>
+            </div>
+            <div class="card-body" id="addedFacultyLog"><p style="color:var(--text3);text-align:center;font-size:.84rem">No faculty added yet.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SCAN LOGS TAB ── -->
+      <div id="admTab-scanlogs" class="hidden">
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-server"></i></div><div><div class="ch-title">Full Scan Audit Log</div><div class="ch-sub">Complete history of all document scans</div></div></div><div class="ch-action" onclick="loadAdminScanLogs()">Refresh →</div></div>
+          <table class="dtable">
+            <thead><tr><th>Student</th><th>Document</th><th>Plagiarism</th><th>AI Score</th><th>Risk</th><th>Subject</th><th>Processed At</th></tr></thead>
+            <tbody id="admScanLogsBody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:2rem">No scan logs yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ────────────────── REPORTS TAB ────────────────── -->
+      <div id="admTab-reports" class="hidden">
+        <div class="card" style="margin-bottom:1.2rem">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-chart-bar"></i></div><div><div class="ch-title">Platform Analytics</div><div class="ch-sub">Subject-wise breakdown</div></div></div></div>
+          <div class="card-body" id="admReportsBody"><p style="color:var(--text3);text-align:center;padding:2rem">Loading analytics...</p></div>
+        </div>
+        <div class="card" style="margin-bottom:1.2rem">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico r"><i class="fas fa-flag"></i></div><div><div class="ch-title">Top Flagged Documents</div><div class="ch-sub">Highest plagiarism scores</div></div></div></div>
+          <div class="card-body" id="admTopFlaggedBody"><p style="color:var(--text3);text-align:center;padding:2rem">Loading...</p></div>
+        </div>
+        <!-- ────────────────── ADMIN AI REFERENCE SOURCE BAR ────────────────── -->
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-globe"></i></div><div><div class="ch-title">AI Reference Source Library</div><div class="ch-sub" id="admRefSub">Search real academic papers by topic or subject</div></div></div></div>
+          <div class="card-body">
+            <div class="ref-search-bar">
+              <input class="ref-search-inp" id="admRefSearchInp" placeholder="e.g. plagiarism detection deep learning, quantum physics" onkeydown="if(event.key==='Enter')searchAdmReferences()">
+              <select id="admRefSubjectSel" style="padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.83rem;background:#fff;color:var(--text);">
+                <option value="">All Subjects</option>
+                <option value="maths">Mathematics</option>
+                <option value="physics">Physics</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="cs">Computer Science</option>
+                <option value="biology">Biology</option>
+              </select>
+              <button class="ref-search-btn" onclick="searchAdmReferences()"><i class="fas fa-search" style="margin-right:.35rem"></i>Search Papers</button>
+            </div>
+            <div id="admRefBar"><div style="text-align:center;color:var(--text3);padding:1.5rem;font-size:.83rem"><i class="fas fa-globe" style="display:block;font-size:1.5rem;color:var(--primary-light);margin-bottom:.5rem;opacity:.5"></i>Enter a topic above to search online academic papers.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────────────────── AI MODEL TAB ────────────────── -->
+      <div id="admTab-aimodel" class="hidden">
+        <div class="stats-row c2" style="margin-bottom:1.2rem">
+          <div class="stat-card v"><div class="sc-top"><div class="sc-lbl">Plagiarism Engine</div><div class="sc-ico v"><i class="fas fa-copy"></i></div></div><div class="sc-val" id="admPlagEngine" style="font-size:1.1rem">Checking...</div><div class="sc-sub">TF-IDF + Cosine Similarity</div></div>
+          <div class="stat-card g"><div class="sc-top"><div class="sc-lbl">AI Detector</div><div class="sc-ico g"><i class="fas fa-robot"></i></div></div><div class="sc-val" id="admAiDetector" style="font-size:1.1rem">Checking...</div><div class="sc-sub">Heuristic Analysis Model</div></div>
+        </div>
+        <div class="card" style="margin-bottom:1.2rem">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico g"><i class="fas fa-heartbeat"></i></div><div><div class="ch-title">System Health Report</div><div class="ch-sub">Live backend status</div></div></div><div class="ch-action" onclick="loadAdminAIModel()">Refresh â†'</div></div>
+          <div class="card-body" id="admAiHealthReport"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico v"><i class="fas fa-info-circle"></i></div><div><div class="ch-title">Model Information</div><div class="ch-sub">Current detection algorithms</div></div></div></div>
+          <div class="card-body">
+            <div class="rbar-list">
+              <div class="rbar-row"><div class="rbar-lbl">Plagiarism</div><div class="rbar-track"><div class="rbar-fill" style="width:90%;background:linear-gradient(90deg,var(--primary),var(--purple))">TF-IDF Cosine</div></div><div class="rbar-cnt">v2.3</div></div>
+              <div class="rbar-row"><div class="rbar-lbl">AI Detection</div><div class="rbar-track"><div class="rbar-fill" style="width:78%;background:linear-gradient(90deg,var(--green),#34D399)">Heuristic NLP</div></div><div class="rbar-cnt">v1.2</div></div>
+              <div class="rbar-row"><div class="rbar-lbl">Risk Scoring</div><div class="rbar-track"><div class="rbar-fill" style="width:95%;background:linear-gradient(90deg,var(--orange),#FCD34D)">Rule-based</div></div><div class="rbar-cnt">v3.0</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────────────────── SETTINGS TAB ────────────────── -->
+      <div id="admTab-settings" class="hidden">
+        <div class="card" style="margin-bottom:1.2rem">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico g"><i class="fas fa-cog"></i></div><div><div class="ch-title">Platform Settings</div><div class="ch-sub">System-wide configuration</div></div></div></div>
+          <div class="card-body">
+            <div class="setting-row"><div class="setting-info"><h4>Auto-Flag High Risk</h4><p>Automatically flag documents above 60% plagiarism</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+            <div class="setting-row"><div class="setting-info"><h4>Student Score Visibility</h4><p>Allow students to see their own plagiarism scores</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+            <div class="setting-row"><div class="setting-info"><h4>Email Notifications</h4><p>Send email alerts for flagged documents</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+            <div class="setting-row"><div class="setting-info"><h4>Maintenance Mode</h4><p>Disable submissions during system maintenance</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="ch-left"><div class="ch-ico r"><i class="fas fa-shield-alt"></i></div><div><div class="ch-title">Security Settings</div><div class="ch-sub">Access control and audit</div></div></div></div>
+          <div class="card-body">
+            <div class="setting-row"><div class="setting-info"><h4>Audit Logging</h4><p>Log all user actions for compliance</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+            <div class="setting-row"><div class="setting-info"><h4>Two-Factor Auth</h4><p>Require 2FA for admin accounts</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+            <div style="margin-top:1rem">
+              <label style="font-size:.81rem;font-weight:500;color:#3D3552;display:block;margin-bottom:.4rem">Session Timeout (minutes)</label>
+              <input type="number" value="60" min="15" max="480" style="padding:.7rem .9rem;border:1.5px solid var(--border);border-radius:11px;font-family:'DM Sans',sans-serif;font-size:.88rem;width:200px">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin.includes('localhost') || window.location.protocol === 'file:'
+  ? 'http://localhost:5000' : '';
+
+let currentRole = null;
+const roles = {
+  student: {cls:'s', icon:'fa-user-graduate', label:'Student', dash:'dashStudent'},
+  faculty: {cls:'f', icon:'fa-chalkboard-teacher', label:'Faculty', dash:'dashFaculty'},
+  admin:   {cls:'a', icon:'fa-user-shield', label:'Administrator', dash:'dashAdmin'}
+};
+
+// ────────────────── AUTH â"€â"€
+function selectRole(r) {
+  currentRole = r;
+  document.getElementById('pageRole').classList.add('hidden');
+  document.getElementById('pageLogin').classList.remove('hidden');
+  applyRoleChip(r);
+  const sb = document.getElementById('btnSignupStudent');
+  if (sb) sb.style.display = (r === 'student') ? 'flex' : 'none';
+}
+function applyRoleChip(r) {
+  const c = document.getElementById('roleChip');
+  c.className = 'role-chip ' + roles[r].cls;
+  c.querySelector('i').className = 'fas ' + roles[r].icon;
+  document.getElementById('roleChipText').textContent = roles[r].label;
+}
+function openSignup() { document.getElementById('pageLogin').classList.add('hidden'); document.getElementById('pageSignup').classList.remove('hidden'); }
+function backToLogin() { document.getElementById('pageSignup').classList.add('hidden'); document.getElementById('pageLogin').classList.remove('hidden'); document.getElementById('signupForm').reset(); const b = document.getElementById('signupStrengthBar'); if (b) { b.style.width='0%'; b.style.background=''; } }
+function checkSignupStrength(el) { const v=el.value,b=document.getElementById('signupStrengthBar');let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;b.style.width=['0%','25%','50%','75%','100%'][s];b.style.background=['','#EF4444','#F59E0B','#10B981','#7C3AED'][s]; }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const sf = document.getElementById('signupForm');
+  if (sf) sf.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const p = document.getElementById('signupPwd').value, cp = document.getElementById('signupConfirmPwd').value;
+    if (p.length < 8) { showToast('Password must be at least 8 characters'); return; }
+    if (p !== cp) { showToast('Passwords do not match'); return; }
+    const btn = sf.querySelector('button[type=submit]');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...'; }
+    fetch(API + '/api/signup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+      full_name: document.getElementById('signupName').value,
+      email:     document.getElementById('signupEmail').value,
+      phone:     document.getElementById('signupPhone').value,
+      password:  p,
+      role:      'student',
+      status:    'pending'
+    })})
+      .then(r => r.json())
+      .then(d => {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account'; }
+        if (d.error) { showToast(d.error); return; }
+        // Show pending message - don't let them log in yet
+        document.getElementById('pageSignup').classList.add('hidden');
+        document.getElementById('pageRole').classList.remove('hidden');
+        sf.reset();
+        setTimeout(() => showToast('Registration submitted! Please wait for admin approval before logging in.'), 300);
+      })
+      .catch(() => {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account'; }
+        showToast('Could not connect to server. Try again.');
+      });
+  });
+});
+
+function goBack() { document.getElementById('pageLogin').classList.add('hidden'); document.getElementById('pageRole').classList.remove('hidden'); document.getElementById('loginForm').reset(); currentRole = null; }
+
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (!currentRole) return;
+  const em = this.querySelector('input[type=email]').value, pw = document.getElementById('pwdInput').value;
+  fetch(API + '/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:em, password:pw, role:currentRole})})
+    .then(r => r.json())
+    .then(d => {
+      if (d.error) { showToast(d.error); return; }
+      // Store logged-in user info globally
+      window._loggedInUser = d.user || {};
+      document.getElementById('pageLogin').classList.add('hidden');
+      document.getElementById(roles[currentRole].dash).classList.remove('hidden');
+      applyUserProfile(d.user || {}, currentRole);
+      updateDates(); updateGreeting();
+      if (currentRole === 'faculty') loadFacultyData();
+      if (currentRole === 'admin')   loadAdminData();
+      loadStudentHistory();
+    })
+    .catch(() => {
+      document.getElementById('pageLogin').classList.add('hidden');
+      document.getElementById(roles[currentRole].dash).classList.remove('hidden');
+      updateDates(); updateGreeting();
+      if (currentRole === 'faculty') loadFacultyData();
+      if (currentRole === 'admin')   loadAdminData();
+    });
+});
+
+function logout() {
+  Object.values(roles).forEach(r => document.getElementById(r.dash).classList.add('hidden'));
+  document.getElementById('loginForm').reset();
+  document.getElementById('pageRole').classList.remove('hidden');
+  currentRole = null;
+  fetch(API + '/api/logout', {method:'POST'}).catch(() => {});
+}
+function togglePwd() { const i = document.getElementById('pwdInput'), t = document.getElementById('pwdToggle'); i.type = i.type === 'password' ? 'text' : 'password'; t.className = i.type === 'password' ? 'fas fa-eye rgt' : 'fas fa-eye-slash rgt'; }
+
+// ── DATES / GREETING ──
+function updateDates() { const o = {weekday:'long',year:'numeric',month:'long',day:'numeric'}, ds = new Date().toLocaleDateString('en-US', o); ['studentDate','facultyDate','adminDate'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ds; }); }
+function updateGreeting() {
+  const h = new Date().getHours(), g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  const u = window._loggedInUser || {};
+  const firstName = (u.full_name || 'there').split(' ')[0];
+  const el = document.getElementById('studentGreet');
+  if (el) el.textContent = g + ', ' + firstName;
+}
+
+function applyUserProfile(user, role) {
+  if (!user || !user.full_name) return;
+  const name = user.full_name;
+  const email = user.email || '';
+  const initials = name.split(' ').map(w => w[0] || '').join('').substring(0, 2).toUpperCase();
+  const firstName = name.split(' ')[0];
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+
+  if (role === 'student') {
+    const nm = document.getElementById('stuName'); if (nm) nm.textContent = name;
+    const av = document.getElementById('stuAvatar'); if (av) av.textContent = initials;
+    const avt = document.getElementById('stuAvatarTop'); if (avt) avt.textContent = initials;
+    const gr = document.getElementById('studentGreet'); if (gr) gr.textContent = g + ', ' + firstName;
+    const dn = document.getElementById('stuDropName'); if (dn) dn.textContent = name;
+    const de = document.getElementById('stuDropEmail'); if (de) de.textContent = email;
+  }
+  if (role === 'faculty') {
+    const nm = document.querySelector('#dashFaculty .sb-uname'); if (nm) nm.textContent = name;
+    const av = document.querySelector('#dashFaculty .sb-av'); if (av) av.textContent = initials;
+    const avt = document.getElementById('facAvatarTop'); if (avt) avt.textContent = initials;
+    const gr = document.getElementById('facultyGreet'); if (gr) gr.textContent = g + ', ' + firstName;
+    const dn = document.getElementById('facDropName'); if (dn) dn.textContent = name;
+    const de = document.getElementById('facDropEmail'); if (de) de.textContent = email;
+  }
+  if (role === 'admin') {
+    const nm = document.querySelector('#dashAdmin .sb-uname'); if (nm) nm.textContent = name;
+    const av = document.querySelector('#dashAdmin .sb-av'); if (av) av.textContent = initials;
+    const avt = document.getElementById('admAvatarTop'); if (avt) avt.textContent = initials;
+    const dn = document.getElementById('admDropName'); if (dn) dn.textContent = name;
+    const de = document.getElementById('admDropEmail'); if (de) de.textContent = email;
+  }
+}
+
+// ── PROFILE DROPDOWN ──
+function toggleProfileDrop(id) {
+  const drop = document.getElementById(id);
+  if (!drop) return;
+  const isOpen = drop.classList.contains('open');
+  // Close all dropdowns first
+  document.querySelectorAll('.profile-dropdown').forEach(d => d.classList.remove('open'));
+  if (!isOpen) drop.classList.add('open');
+}
+function closeProfileDrop() {
+  document.querySelectorAll('.profile-dropdown').forEach(d => d.classList.remove('open'));
+}
+function switchAccount() {
+  // Full logout and return to role selection
+  logout();
+  showToast('Select a role to switch accounts');
+}
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.profile-wrap')) closeProfileDrop();
+});
+
+function loadStudentHistory() {
+  const uid = (window._loggedInUser || {}).id;
+  if (!uid) return;
+  fetch(API + '/api/documents/user/' + uid)
+    .then(r => r.json())
+    .then(d => {
+      const docs = d.documents || [];
+      stuSubmissions = docs.map(doc => ({
+        date: new Date(doc.created_at || Date.now()).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+        subject: doc.subject || '',
+        filename: doc.filename || 'document',
+        ts: new Date(doc.created_at || Date.now()).getTime()
+      }));
+      updateStuHistoryTable();
+      renderStuSubjects();
+    }).catch(() => {});
+}
+
+// ── FORGOT PASSWORD ──
+let fpStep = 1;
+function openForgot() { fpGoTo(1); document.getElementById('forgotModal').classList.add('open'); }
+function closeForgot() { document.getElementById('forgotModal').classList.remove('open'); setTimeout(() => fpGoTo(1), 300); }
+function fpGoTo(n) { fpStep = n; document.querySelectorAll('.modal-step').forEach((s, i) => s.classList.toggle('active', i + 1 === n)); }
+function fpSendCode() { const em = document.getElementById('fpEmail').value.trim(); if (!em) { showToast('Please enter your email'); return; } document.getElementById('fpSentMsg').innerHTML = 'A 6-digit code has been sent to <strong>' + em + '</strong>.'; fpGoTo(2); document.querySelectorAll('.otp-input').forEach(i => i.value = ''); document.querySelectorAll('.otp-input')[0].focus(); }
+function fpResend() { fpSendCode(); showToast('Code resent'); }
+function otpMove(el, i) { if (el.value && i < 5) document.querySelectorAll('.otp-input')[i + 1].focus(); }
+function otpBack(e, i) { if (e.key === 'Backspace' && !e.target.value && i > 0) document.querySelectorAll('.otp-input')[i - 1].focus(); }
+function fpVerify() { const c = [...document.querySelectorAll('.otp-input')].map(i => i.value).join(''); if (c.length < 6) { showToast('Enter all 6 digits'); return; } fpGoTo(3); }
+function checkStrength(el) { const v = el.value, b = document.getElementById('strengthBar'); let s = 0; if (v.length >= 8) s++; if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++; b.style.width = ['0%','25%','50%','75%','100%'][s]; b.style.background = ['','#EF4444','#F59E0B','#10B981','#7C3AED'][s]; }
+function fpReset() { const p1 = document.getElementById('newPwd').value, p2 = document.getElementById('confirmPwd').value; if (!p1 || p1.length < 8) { showToast('Min 8 characters'); return; } if (p1 !== p2) { showToast('Passwords do not match'); return; } fpGoTo(4); }
+
+// ────────────────── NOTIFICATIONS â"€â"€
+function openNotif() { document.getElementById('notifOvr').classList.add('open'); document.getElementById('notifPanel').classList.add('open'); }
+function closeNotif() { document.getElementById('notifOvr').classList.remove('open'); document.getElementById('notifPanel').classList.remove('open'); }
+
+// ────────────────── TOAST â"€â"€
+function showToast(m) { const t = document.getElementById('toast'); document.getElementById('toastMsg').textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
+
+// ────────────────── DATES / GREETING â"€â"€
+function updateDates() { const o = {weekday:'long',year:'numeric',month:'long',day:'numeric'}, ds = new Date().toLocaleDateString('en-US', o); ['studentDate','facultyDate','adminDate'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ds; }); }
+function updateGreeting() {
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  const u = window._loggedInUser || {};
+  const firstName = (u.full_name || 'there').split(' ')[0];
+  const el = document.getElementById('studentGreet');
+  if (el) el.textContent = g + ', ' + firstName;
+}
+
+// STUDENT LOGIC
+const subjectNames = {maths:'Mathematics', physics:'Physics', chemistry:'Chemistry', cs:'Computer Science', biology:'Biology'};
+let uploadedFile = null;
+let stuSubmissions = []; // local store for student submissions
+
+function handleFile(inp) {
+  if (inp.files.length) {
+    uploadedFile = inp.files[0];
+    document.querySelector('#uploadZone h3').textContent = uploadedFile.name;
+    document.querySelector('#uploadZone p').textContent = (uploadedFile.size / 1024).toFixed(1) + ' KB';
+    showToast('File loaded: ' + uploadedFile.name);
+  }
+}
+
+const uz = document.getElementById('uploadZone');
+if (uz) {
+  uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('drag'); });
+  uz.addEventListener('dragleave', () => uz.classList.remove('drag'));
+  uz.addEventListener('drop', e => { e.preventDefault(); uz.classList.remove('drag'); if (e.dataTransfer.files.length) { document.getElementById('fileInput').files = e.dataTransfer.files; handleFile(document.getElementById('fileInput')); } });
+}
+
+function switchStuTab(tab, el) {
+  document.querySelectorAll('#dashStudent .sb-nav .nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('[id^="stuTab-"]').forEach(t => t.classList.add('hidden'));
+  const panel = document.getElementById('stuTab-' + tab);
+  if (panel) panel.classList.remove('hidden');
+  if (tab === 'subjects') renderStuSubjects();
+  if (tab === 'reports') renderStuReports();
+}
+
+function runScan() {
+  const txt = document.getElementById('scanTextInput').value.trim();
+  const subj = document.getElementById('subjectSelect').value;
+  if (!subj) { showToast('Please select a subject first'); return; }
+  if (!txt && !uploadedFile) { showToast('Please paste text or upload a file'); return; }
+  document.getElementById('scanLoading').classList.remove('hidden');
+  document.getElementById('scanResults').classList.add('hidden');
+  document.getElementById('scanBtn').disabled = true;
+  const fname = uploadedFile ? uploadedFile.name : 'pasted_text.txt';
+
+  const doConfirm = (d) => renderStudentConfirm(d, subj, fname);
+  const doError = (e) => scanError(e);
+
+  if (uploadedFile) {
+    const fd = new FormData();
+    fd.append('file', uploadedFile);
+    fd.append('subject', subj);
+    if (window._loggedInUser && window._loggedInUser.id) fd.append('user_id', window._loggedInUser.id);
+    fetch(API + '/api/scan', {method:'POST', body:fd}).then(r => r.json()).then(doConfirm).catch(doError);
+  } else {
+    const uid = (window._loggedInUser || {}).id || 'guest';
+    fetch(API + '/api/scan', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text:txt, filename:fname, subject:subj, user_id:uid})}).then(r => r.json()).then(doConfirm).catch(doError);
+  }
+}
+
+function scanError(e) {
+  document.getElementById('scanLoading').classList.add('hidden');
+  document.getElementById('scanBtn').disabled = false;
+  showToast('Upload failed: ' + e.message + '. Is the backend running?');
+}
+
+function renderStudentConfirm(d, subj, fname) {
+  document.getElementById('scanLoading').classList.add('hidden');
+  document.getElementById('scanBtn').disabled = false;
+  if (d.error) { showToast('Error: ' + d.error); return; }
+  document.getElementById('scanResults').classList.remove('hidden');
+  document.getElementById('submitSubject').textContent = subjectNames[subj] || subj;
+  document.getElementById('submitFile').textContent = fname;
+  // Store submission locally
+  const now = new Date();
+  stuSubmissions.unshift({ date: now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), subject: subj, filename: fname, ts: now.getTime() });
+  updateStuHistoryTable();
+  showToast('Document submitted successfully!');
+  uploadedFile = null;
+  document.getElementById('scanTextInput').value = '';
+  document.getElementById('subjectSelect').value = '';
+  document.querySelector('#uploadZone h3').textContent = 'Drop your document here';
+  document.querySelector('#uploadZone p').textContent = 'Supports TXT, PDF, DOCX &middot; Max 10MB';
+}
+
+function updateStuHistoryTable() {
+  const tbody = document.getElementById('stuHistoryBody');
+  if (!stuSubmissions.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:1.5rem">No submissions yet. Upload a document to get started.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = stuSubmissions.map(s =>
+    `<tr><td>${s.date}</td><td>${subjectNames[s.subject] || s.subject}</td><td>${s.filename}</td><td><span class="badge low">Submitted</span></td></tr>`
+  ).join('');
+}
+
+let stuSortAsc = false;
+function sortStuHistory() {
+  stuSortAsc = !stuSortAsc;
+  stuSubmissions.sort((a, b) => stuSortAsc ? a.ts - b.ts : b.ts - a.ts);
+  updateStuHistoryTable();
+}
+
+function renderStuSubjects() {
+  const counts = {maths:0,physics:0,chemistry:0,cs:0,biology:0};
+  stuSubmissions.forEach(s => { if (counts[s.subject] !== undefined) counts[s.subject]++; });
+  const total = stuSubmissions.length;
+  document.getElementById('stuTotalDocs').textContent = total;
+  document.getElementById('stuCleanDocs').textContent = total; // All submitted are "clean" from student view
+  document.getElementById('stuFlaggedDocs').textContent = 0;
+  Object.keys(counts).forEach(subj => {
+    const cnt = counts[subj];
+    document.getElementById('stuCnt-' + subj).textContent = cnt;
+    if (cnt > 0) {
+      document.getElementById('stuOrig-' + subj).textContent = '--';
+      document.getElementById('stuStat-' + subj).innerHTML = '<span class="badge info">Submitted</span>';
+    } else {
+      document.getElementById('stuOrig-' + subj).textContent = '--';
+      document.getElementById('stuStat-' + subj).innerHTML = '<span class="badge low">No Scans</span>';
+    }
+  });
+}
+
+function renderStuReports() {
+  const area = document.getElementById('stuReportsBody');
+  if (!stuSubmissions.length) {
+    area.innerHTML = '<p style="color:var(--text3);text-align:center;padding:2rem">Submit documents to generate your reports.</p>';
+    return;
+  }
+  const counts = {maths:0,physics:0,chemistry:0,cs:0,biology:0};
+  stuSubmissions.forEach(s => { if (counts[s.subject] !== undefined) counts[s.subject]++; });
+  const total = stuSubmissions.length;
+  area.innerHTML = `
+    <div style="margin-bottom:1rem"><div style="font-size:.82rem;font-weight:600;color:var(--text2);margin-bottom:.6rem"> Submissions by Subject</div>
+    ${Object.entries(counts).map(([k,v]) => v > 0 ? `
+    <div class="rbar-row" style="margin-bottom:.6rem">
+      <div class="rbar-lbl">${subjectNames[k]}</div>
+      <div class="rbar-track"><div class="rbar-fill" style="width:${Math.round(v/total*100)}%;background:linear-gradient(90deg,var(--primary),var(--purple))">${v} doc${v>1?'s':''}</div></div>
+      <div class="rbar-cnt">${Math.round(v/total*100)}%</div>
+    </div>` : '').join('')}
+    </div>
+    <div class="alert success"><i class="fas fa-check-circle"></i><div><div class="alert-title">Integrity Status: Good</div><div class="alert-body">All your ${total} submission${total>1?'s are':' is'} currently under faculty review. You'll be notified of results.</div></div></div>`;
+}
+
+function stuSearchFilter(q) {
+  const rows = document.querySelectorAll('#stuHistoryBody tr');
+  rows.forEach(r => { r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'; });
+}
+
+function saveStuSettings() {
+  const name = document.getElementById('stuDisplayName').value.trim();
+  if (name) { document.getElementById('stuName').textContent = name; showToast('Settings saved!'); }
+  else showToast('Enter a display name');
+}
+
+// ──────────────────//   FACULTY LOGIC
+// ──────────────────let _facAllDocs = [];
+
+function switchFacultyTab(tab, el) {
+  document.querySelectorAll('#dashFaculty .sb-nav .nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('[id^="facTab-"]').forEach(t => t.classList.add('hidden'));
+  const panel = document.getElementById('facTab-' + tab);
+  if (panel) panel.classList.remove('hidden');
+  if (['overview','submissions','flagged','analyse'].includes(tab)) loadFacultyData();
+  if (tab === 'reports') renderFacReports();
+}
+
+function loadFacultyData() {
+  fetch(API + '/api/documents').then(r => r.json()).then(d => {
+    const docs = d.documents || [];
+    _facAllDocs = docs;
+    const flagged = docs.filter(x => (x.plagiarism_score || 0) >= 50 || (x.ai_score || 0) >= 50);
+
+    document.getElementById('facTotalSub').textContent = docs.length;
+    document.getElementById('facFlagged').textContent = flagged.length;
+    document.getElementById('facSubCount').textContent = docs.length;
+    document.getElementById('facFlagCount').textContent = flagged.length;
+
+    if (docs.length) {
+      const avg = docs.reduce((a, x) => a + (100 - (x.plagiarism_score || 0)), 0) / docs.length;
+      document.getElementById('facAvgOrig').textContent = Math.round(avg) + '%';
+      document.getElementById('facAiFlagged').textContent = docs.filter(x => (x.ai_score || 0) >= 50).length;
+    }
+
+    const rowHtml = (x, i) => `<tr>
+      <td>${x.student_name || 'Student'}</td>
+      <td>${x.filename}</td>
+      <td><strong>${(x.plagiarism_score || 0).toFixed(1)}%</strong></td>
+      <td>${(x.ai_score || 0).toFixed(1)}%</td>
+      <td><span class="risk-badge ${x.risk_level || 'low'}">${(x.risk_level || 'low').toUpperCase()}</span></td>
+      <td>${x.subject || '--'}</td>
+      <td><span class="ch-action" style="cursor:pointer" onclick="openDocModal(${i})">View</span></td>
+    </tr>`;
+    const emptyRow = n => `<tr><td colspan="${n}" style="text-align:center;color:var(--text3);padding:2rem">No submissions yet.</td></tr>`;
+
+    const ob = document.getElementById('facTableBody');
+    if (ob) ob.innerHTML = docs.length ? docs.map(rowHtml).join('') : emptyRow(7);
+
+    const sb = document.getElementById('facSubsTableBody');
+    if (sb) sb.innerHTML = docs.length ? docs.map((x, i) => `<tr>
+      <td>${x.student_name || 'Student'}</td>
+      <td>${x.filename}</td>
+      <td><strong>${(x.plagiarism_score || 0).toFixed(1)}%</strong></td>
+      <td>${(x.ai_score || 0).toFixed(1)}%</td>
+      <td><span class="risk-badge ${x.risk_level || 'low'}">${(x.risk_level || 'low').toUpperCase()}</span></td>
+      <td>${x.subject || '--'}</td>
+      <td><span class="ch-action" style="cursor:pointer" onclick="openDocModal(${i})">View</span></td>
+    </tr>`).join('') : emptyRow(7);
+
+    const flaggedHtml = flagged.length
+      ? flagged.map(x => `<div class="alert danger"><i class="fas fa-exclamation-triangle"></i><div>
+          <div class="alert-title">${x.student_name || 'Student'} â€" ${x.filename}</div>
+          <div class="alert-body">Plagiarism: ${(x.plagiarism_score || 0).toFixed(1)}% . AI: ${(x.ai_score || 0).toFixed(1)}% . Subject: ${x.subject || '--'}</div>
+        </div></div>`).join('')
+      : '<div class="alert info"><i class="fas fa-check-circle"></i><div><div class="alert-title">All Clear</div><div class="alert-body">No flagged documents.</div></div></div>';
+
+    const fa = document.getElementById('facFlaggedArea'); if (fa) fa.innerHTML = flaggedHtml;
+    const fa2 = document.getElementById('facFlaggedArea2'); if (fa2) fa2.innerHTML = flaggedHtml;
+
+    // Populate Analyse dropdown
+    const sel = document.getElementById('facDocSelect');
+    if (sel) {
+      sel.innerHTML = '<option value="">-- Select a submission --</option>' +
+        docs.map((x, i) => `<option value="${i}">${x.student_name || 'Student'} â€" ${x.filename} (${x.subject || 'general'})</option>`).join('');
+    }
+  }).catch(() => {});
+}
+
+function facSearchFilter(q) {
+  const lower = q.toLowerCase();
+  ['facTableBody','facSubsTableBody'].forEach(id => {
+    const rows = document.querySelectorAll('#' + id + ' tr');
+    rows.forEach(r => { r.style.display = r.textContent.toLowerCase().includes(lower) ? '' : 'none'; });
+  });
+}
+
+function renderFacReports() {
+  const area = document.getElementById('facReportsArea');
+  if (!_facAllDocs.length) { area.innerHTML = '<p style="color:var(--text3);text-align:center;padding:2rem">Submit documents to generate reports.</p>'; return; }
+  const bySubject = {};
+  _facAllDocs.forEach(d => {
+    const s = d.subject || 'general';
+    if (!bySubject[s]) bySubject[s] = { count:0, plag:0, ai:0 };
+    bySubject[s].count++;
+    bySubject[s].plag += d.plagiarism_score || 0;
+    bySubject[s].ai += d.ai_score || 0;
+  });
+  area.innerHTML = Object.entries(bySubject).map(([s, v]) => `
+    <div style="margin-bottom:1rem;padding:.9rem;border:1px solid var(--border);border-radius:var(--radius-sm)">
+      <div style="font-weight:600;font-size:.9rem;color:var(--text);margin-bottom:.5rem">${subjectNames[s] || s} <span class="badge info">${v.count} doc${v.count>1?'s':''}</span></div>
+      <div class="rbar-row" style="margin-bottom:.3rem"><div class="rbar-lbl">Avg Plagiarism</div><div class="rbar-track"><div class="rbar-fill" style="width:${Math.min(v.plag/v.count,100).toFixed(0)}%;background:linear-gradient(90deg,var(--red),#F87171)">${(v.plag/v.count).toFixed(1)}%</div></div></div>
+      <div class="rbar-row"><div class="rbar-lbl">Avg AI Score</div><div class="rbar-track"><div class="rbar-fill" style="width:${Math.min(v.ai/v.count,100).toFixed(0)}%;background:linear-gradient(90deg,var(--orange),#FCD34D)">${(v.ai/v.count).toFixed(1)}%</div></div></div>
+    </div>`).join('');
+}
+
+// ────────────────── Faculty Document Modal â"€â"€
+function openDocModal(idx) {
+  const doc = _facAllDocs[idx];
+  if (!doc) return;
+  document.getElementById('docModalTitle').textContent = doc.filename;
+  document.getElementById('docModalMeta').textContent = ` ${doc.student_name || 'Student'} . ${subjectNames[doc.subject] || doc.subject || 'General'} . ${doc.word_count || 0} words`;
+  document.getElementById('docModalGauges').innerHTML = `
+    <div class="gauge ${(doc.plagiarism_score||0)>=60?'r':(doc.plagiarism_score||0)>=30?'o':'g'}">
+      <div class="gauge-val">${(doc.plagiarism_score||0).toFixed(1)}%</div><div class="gauge-lbl">Plagiarism</div>
+    </div>
+    <div class="gauge ${(doc.ai_score||0)>=60?'r':(doc.ai_score||0)>=30?'o':'g'}">
+      <div class="gauge-val">${(doc.ai_score||0).toFixed(1)}%</div><div class="gauge-lbl">AI Content</div>
+    </div>
+    <div class="gauge v">
+      <div class="gauge-val"><span class="risk-badge ${doc.risk_level||'low'}">${(doc.risk_level||'low').toUpperCase()}</span></div><div class="gauge-lbl">Risk Level</div>
+    </div>`;
+  document.getElementById('docModalContent').textContent = doc.original_text || 'Document content not available in summary view.';
+  document.getElementById('docModalHeatmap').innerHTML = '<p style="color:var(--text3)">Loading detailed analysis...</p>';
+  document.getElementById('docModalAI').innerHTML = '<p style="color:var(--text3)">Loading AI breakdown...</p>';
+  document.getElementById('docViewModal').classList.add('open');
+
+  // Fetch full report
+  const docId = doc.id || doc.doc_id;
+  if (docId) {
+    fetch(API + '/api/documents/' + docId + '/report').then(r => r.json()).then(rep => {
+      const r = rep.report || rep;
+      const hm = r.heatmap_data || [];
+      document.getElementById('docModalHeatmap').innerHTML = hm.slice(0,25).map(h =>
+        `<div class="hm-sent" style="border-color:${h.color};background:${h.color}11"><span class="hm-score" style="background:${h.color}">${h.score}%</span>${h.text}</div>`
+      ).join('') || '<p style="color:var(--text3)">No heatmap data.</p>';
+      const ap = (r.ai_detection_detail || {}).paragraph_breakdown || [];
+      document.getElementById('docModalAI').innerHTML = ap.map(p =>
+        `<div class="hm-sent" style="border-color:${p.color};background:${p.color}11;margin-bottom:.4rem"><span class="hm-score" style="background:${p.color}">${p.ai_probability||0}%</span><strong>${p.verdict||''}</strong><br><span style="font-size:.78rem;color:var(--text3)">${p.text_preview||''}</span></div>`
+      ).join('') || '<p style="color:var(--text3)">No AI breakdown data.</p>';
+    }).catch(() => {
+      document.getElementById('docModalHeatmap').innerHTML = '<p style="color:var(--text3)">Could not load detailed analysis. Backend may be offline.</p>';
+      document.getElementById('docModalAI').innerHTML = '<p style="color:var(--text3)">Could not load AI analysis.</p>';
+    });
+  }
+}
+
+function closeDocModal() { document.getElementById('docViewModal').classList.remove('open'); }
+
+// ────────────────── Faculty Analyse Tab â"€â"€
+function loadFacDocAnalysis() {
+  const sel = document.getElementById('facDocSelect');
+  const idx = parseInt(sel.value);
+  if (isNaN(idx) || !_facAllDocs[idx]) {
+    document.getElementById('facAnalyseResults').classList.add('hidden');
+    document.getElementById('facAnalyseEmpty').classList.remove('hidden');
+    return;
+  }
+  const doc = _facAllDocs[idx];
+  document.getElementById('facDocPreviewSub').textContent = `${doc.word_count || 0} words . ${subjectNames[doc.subject] || doc.subject || 'general'}`;
+  document.getElementById('facDocPreview').textContent = doc.original_text || 'Document text not available.';
+
+  fetch(API + '/api/documents/' + (doc.id || doc.doc_id) + '/report').then(r => r.json()).then(rep => {
+    renderFacAnalyse(rep);
+  }).catch(() => {
+    renderFacAnalyseFallback(doc);
+  });
+}
+
+function renderFacAnalyse(rep) {
+  document.getElementById('facAnalyseEmpty').classList.add('hidden');
+  document.getElementById('facAnalyseResults').classList.remove('hidden');
+  const r = rep.report || rep;
+  const s = r.summary || {};
+  document.getElementById('facGaugeRow').innerHTML = `
+    <div class="gauge ${(s.plagiarism_score||0)>=60?'r':(s.plagiarism_score||0)>=30?'o':'g'}">
+      <div class="gauge-val">${s.plagiarism_score||0}%</div><div class="gauge-lbl">Plagiarism</div>
+      <div class="gauge-sub">${s.flagged_sentences||0}/${s.total_sentences||0} flagged</div>
+    </div>
+    <div class="gauge ${(s.ai_content_score||0)>=60?'r':(s.ai_content_score||0)>=30?'o':'g'}">
+      <div class="gauge-val">${s.ai_content_score||0}%</div><div class="gauge-lbl">AI Content</div>
+      <div class="gauge-sub">${s.high_risk_paragraphs||0} high-risk</div>
+    </div>
+    <div class="gauge v">
+      <div class="gauge-val"><span class="risk-badge ${s.overall_risk_level||'low'}">${(s.overall_risk_level||'low').toUpperCase()}</span></div>
+      <div class="gauge-lbl">Risk Level</div>
+      <div class="gauge-sub">${(r.metrics||{}).total_processing_time||0}s</div>
+    </div>`;
+  const hm = r.heatmap_data || [];
+  document.getElementById('facHeatmapSub').textContent = hm.length + ' sentences';
+  document.getElementById('facHeatmapArea').innerHTML = hm.slice(0, 30).map(h =>
+    `<div class="hm-sent" style="border-color:${h.color};background:${h.color}11"><span class="hm-score" style="background:${h.color}">${h.score}%</span>${h.text}</div>`
+  ).join('') || '<p style="color:var(--text3)">No heatmap data.</p>';
+  const srcs = (r.plagiarism_detail || {}).matched_sources || [];
+  document.getElementById('facSourcesSub').textContent = srcs.length + ' sources found';
+  document.getElementById('facSourcesArea').innerHTML = srcs.length
+    ? srcs.map(s => `<div class="src-item"><div class="src-ico"><i class="fas fa-book"></i></div><div class="src-info"><div class="src-title">${s.title}</div><div class="src-meta">${s.author||''} . ${s.source||''}</div></div><div class="src-pct" style="color:${(s.avg_similarity||0)>=60?'var(--red)':'var(--orange)'}">${s.avg_similarity||0}%</div></div>`).join('')
+    : '<p style="color:var(--text3);text-align:center;padding:1rem">No matched sources - document appears original.</p>';
+  const ap = (r.ai_detection_detail || {}).paragraph_breakdown || [];
+  document.getElementById('facAiParaArea').innerHTML = ap.map(p =>
+    `<div class="hm-sent" style="border-color:${p.color};background:${p.color}11;margin-bottom:.5rem"><span class="hm-score" style="background:${p.color}">${p.ai_probability||0}%</span><strong>${p.verdict||''}</strong><br><span style="font-size:.78rem;color:var(--text3)">${p.text_preview||''}</span></div>`
+  ).join('') || '<p style="color:var(--text3)">No AI breakdown data.</p>';
+}
+
+function renderFacAnalyseFallback(doc) {
+  document.getElementById('facAnalyseEmpty').classList.add('hidden');
+  document.getElementById('facAnalyseResults').classList.remove('hidden');
+  document.getElementById('facGaugeRow').innerHTML = `
+    <div class="gauge ${(doc.plagiarism_score||0)>=60?'r':(doc.plagiarism_score||0)>=30?'o':'g'}">
+      <div class="gauge-val">${(doc.plagiarism_score||0).toFixed(1)}%</div><div class="gauge-lbl">Plagiarism</div><div class="gauge-sub">--</div>
+    </div>
+    <div class="gauge ${(doc.ai_score||0)>=60?'r':(doc.ai_score||0)>=30?'o':'g'}">
+      <div class="gauge-val">${(doc.ai_score||0).toFixed(1)}%</div><div class="gauge-lbl">AI Content</div><div class="gauge-sub">--</div>
+    </div>
+    <div class="gauge v">
+      <div class="gauge-val"><span class="risk-badge ${doc.risk_level||'low'}">${(doc.risk_level||'low').toUpperCase()}</span></div>
+      <div class="gauge-lbl">Risk Level</div><div class="gauge-sub">--</div>
+    </div>`;
+  document.getElementById('facHeatmapArea').innerHTML = '<p style="color:var(--text3)">Detailed heatmap not available. Backend may be offline.</p>';
+  document.getElementById('facSourcesArea').innerHTML = '<p style="color:var(--text3);text-align:center;padding:1rem">Source data not available.</p>';
+  document.getElementById('facAiParaArea').innerHTML = '<p style="color:var(--text3)">AI breakdown not available.</p>';
+}
+
+// â- â- â- â- â- â- â- â- â- â- â- â- â- â- â- â- â- â- 
+//   ADMIN LOGIC
+// â- â- â- â- â- â- â- â- â- â- â- â- â- â- â- â- â- â- 
+let _admAllScans = [];
+let _admAllUsers = [];
+
+function switchAdminTab(tab, el) {
+  document.querySelectorAll('#dashAdmin .sb-nav .nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('[id^="admTab-"]').forEach(t => t.classList.add('hidden'));
+  const panel = document.getElementById('admTab-' + tab);
+  if (panel) panel.classList.remove('hidden');
+  if (tab === 'users')     loadAdminUsers();
+  if (tab === 'approvals') loadApprovals();
+  if (tab === 'scanlogs')  loadAdminScanLogs();
+  if (tab === 'reports')   loadAdminReports();
+  if (tab === 'aimodel')   loadAdminAIModel();
+}
+
+// ────────────────── Approvals Logic ───────────────────────────────────────
+let _approvedCount = 0, _rejectedCount = 0;
+
+function loadApprovals() {
+  const body = document.getElementById('approvalsBody');
+  if (!body) return;
+  body.innerHTML = '<div class="alert info"><i class="fas fa-spinner fa-spin"></i><div><div class="alert-title">Loading pending requests...</div></div></div>';
+
+  fetch(API + '/api/users/pending')
+    .then(r => r.json())
+    .then(d => {
+      const users = d.users || [];
+      const badge = document.getElementById('admPendingBadge');
+      const countEl = document.getElementById('admPendingCount');
+      if (badge) badge.textContent = users.length;
+      if (countEl) countEl.textContent = users.length;
+
+      if (!users.length) {
+        body.innerHTML = '<div class="alert success"><i class="fas fa-check-circle"></i><div><div class="alert-title">No pending requests</div><div class="alert-body">All sign-ups have been reviewed.</div></div></div>';
+        return;
+      }
+
+      body.innerHTML = `<table class="dtable">
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Requested</th><th style="text-align:center">Actions</th></tr></thead>
+        <tbody>
+          ${users.map(u => `<tr id="appr-row-${u.id}">
+            <td><strong>${u.full_name || '--'}</strong></td>
+            <td style="color:var(--text3)">${u.email}</td>
+            <td style="color:var(--text3)">${u.phone || '--'}</td>
+            <td style="color:var(--text3)">${u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '--'}</td>
+            <td style="text-align:center">
+              <button onclick="approveUser('${u.id}','${u.full_name}')" style="background:linear-gradient(135deg,#10B981,#34D399);color:#fff;border:none;padding:.45rem 1rem;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;margin-right:.4rem;font-family:inherit">
+                <i class="fas fa-check"></i> Approve
+              </button>
+              <button onclick="rejectUser('${u.id}','${u.full_name}')" style="background:linear-gradient(135deg,#EF4444,#F87171);color:#fff;border:none;padding:.45rem 1rem;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit">
+                <i class="fas fa-times"></i> Reject
+              </button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    })
+    .catch(() => {
+      body.innerHTML = '<div class="alert danger"><i class="fas fa-times-circle"></i><div><div class="alert-title">Cannot reach backend</div><div class="alert-body">Make sure Flask is running.</div></div></div>';
+    });
+}
+
+function approveUser(userId, name) {
+  fetch(API + '/api/users/' + userId + '/status', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'active' })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.error) { showToast('Error: ' + d.error); return; }
+    showToast(name + ' approved successfully!');
+    const row = document.getElementById('appr-row-' + userId);
+    if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .4s'; setTimeout(() => row.remove(), 400); }
+    _approvedCount++;
+    const ac = document.getElementById('admApprovedCount'); if (ac) ac.textContent = _approvedCount;
+    const badge = document.getElementById('admPendingBadge');
+    const cnt = document.getElementById('admPendingCount');
+    const cur = parseInt(badge?.textContent || '0') - 1;
+    if (badge) badge.textContent = Math.max(0, cur);
+    if (cnt) cnt.textContent = Math.max(0, cur);
+    // refresh user counts
+    fetch(API + '/api/stats').then(r => r.json()).then(s => {
+      ['admUserCount','admUserTotal'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = s.total_users||0; });
+    }).catch(() => {});
+  })
+  .catch(() => showToast('Could not connect to backend'));
+}
+
+function rejectUser(userId, name) {
+  if (!confirm('Reject signup request from ' + name + '? This cannot be undone.')) return;
+  fetch(API + '/api/users/' + userId + '/status', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'rejected' })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.error) { showToast('Error: ' + d.error); return; }
+    showToast(name + "'s request rejected.");
+    const row = document.getElementById('appr-row-' + userId);
+    if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .4s'; setTimeout(() => row.remove(), 400); }
+    _rejectedCount++;
+    const rc = document.getElementById('admRejectedCount'); if (rc) rc.textContent = _rejectedCount;
+    const badge = document.getElementById('admPendingBadge');
+    const cnt = document.getElementById('admPendingCount');
+    const cur = parseInt(badge?.textContent || '0') - 1;
+    if (badge) badge.textContent = Math.max(0, cur);
+    if (cnt) cnt.textContent = Math.max(0, cur);
+  })
+  .catch(() => showToast('Could not connect to backend'));
+}
+
+// ────────────────── Add Student / Faculty Logic ──────────────────────────
+let _sessionAddedUsers = [];
+
+function _submitNewUser(role, fields) {
+  const { name, email, phone, password, confirmPwd, dept, btn, form } = fields;
+  if (!name || !email || !password) { showToast('Name, email and password are required'); return; }
+  if (password.length < 8) { showToast('Password must be at least 8 characters'); return; }
+  if (password !== confirmPwd) { showToast('Passwords do not match'); return; }
+
+  const payload = { full_name: name, email, phone: phone || '', password, role, status: 'active' };
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Creating...</span>';
+
+  fetch(API + '/api/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(d => {
+    btn.disabled = false;
+    const label = role === 'student' ? 'Student' : 'Faculty';
+    const btnColor = role === 'student'
+      ? '<i class="fas fa-user-plus"></i><span>Create Student Account</span>'
+      : '<i class="fas fa-chalkboard-teacher"></i><span>Create Faculty Account</span>';
+    btn.innerHTML = btnColor;
+
+    if (d.error) { showToast('Error: ' + d.error); return; }
+
+    showToast(label + ' account created successfully!');
+    form.reset();
+
+    // Log to role-specific session list
+    _sessionAddedUsers.unshift({ name, email, role, dept: dept || '', time: new Date() });
+    _renderSessionLog('student');
+    _renderSessionLog('faculty');
+
+    // Refresh user stats
+    fetch(API + '/api/stats').then(r => r.json()).then(s => {
+      ['admUserCount','admUserTotal'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = s.total_users||0; });
+      ['admStudents','admUserStudents'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = s.total_students||0; });
+      ['admFaculty','admUserFaculty'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = s.total_faculty||0; });
+    }).catch(() => {});
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.innerHTML = role === 'student'
+      ? '<i class="fas fa-user-plus"></i><span>Create Student Account</span>'
+      : '<i class="fas fa-chalkboard-teacher"></i><span>Create Faculty Account</span>';
+    showToast('Cannot reach backend. Is Flask running?');
+  });
+}
+
+function _renderSessionLog(role) {
+  const logId = role === 'student' ? 'addedStudentsLog' : 'addedFacultyLog';
+  const el = document.getElementById(logId);
+  if (!el) return;
+  const filtered = _sessionAddedUsers.filter(u => u.role === role);
+  if (!filtered.length) {
+    el.innerHTML = '<p style="color:var(--text3);text-align:center;font-size:.84rem">No ' + role + 's added yet this session.</p>';
+    return;
+  }
+  const cols = role === 'faculty'
+    ? '<th>Name</th><th>Email</th><th>Department</th><th>Added At</th>'
+    : '<th>Name</th><th>Email</th><th>Added At</th>';
+  const rows = filtered.map(u => {
+    const deptCol = role === 'faculty' ? `<td style="color:var(--text3)">${u.dept || '--'}</td>` : '';
+    return `<tr><td><strong>${u.name}</strong></td><td style="color:var(--text3)">${u.email}</td>${deptCol}<td style="color:var(--text3)">${u.time.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</td></tr>`;
+  }).join('');
+  el.innerHTML = `<table class="dtable"><thead><tr>${cols}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Add Student form
+  const addStuF = document.getElementById('addStudentForm');
+  if (addStuF) {
+    addStuF.addEventListener('submit', function(e) {
+      e.preventDefault();
+      _submitNewUser('student', {
+        name:       document.getElementById('astu-name').value.trim(),
+        email:      document.getElementById('astu-email').value.trim(),
+        phone:      document.getElementById('astu-phone').value.trim(),
+        password:   document.getElementById('astu-pwd').value,
+        confirmPwd: document.getElementById('astu-cpwd').value,
+        dept:       '',
+        btn:        document.getElementById('addStuBtn'),
+        form:       this
+      });
+    });
+  }
+
+  // Add Faculty form
+  const addFacF = document.getElementById('addFacultyForm');
+  if (addFacF) {
+    addFacF.addEventListener('submit', function(e) {
+      e.preventDefault();
+      _submitNewUser('faculty', {
+        name:       document.getElementById('afac-name').value.trim(),
+        email:      document.getElementById('afac-email').value.trim(),
+        phone:      document.getElementById('afac-phone').value.trim(),
+        password:   document.getElementById('afac-pwd').value,
+        confirmPwd: document.getElementById('afac-cpwd').value,
+        dept:       document.getElementById('afac-dept').value.trim(),
+        btn:        document.getElementById('addFacBtn'),
+        form:       this
+      });
+    });
+  }
+});
+
+
+function loadAdminData() {
+  // Stats
+  fetch(API + '/api/stats').then(r => r.json()).then(s => {
+    document.getElementById('admScans').textContent        = s.total_scans || 0;
+    document.getElementById('admFlagged').textContent      = s.flagged_documents || 0;
+    document.getElementById('admAvgPlag').textContent      = (s.avg_plagiarism || 0) + '%';
+    document.getElementById('admTotalUsers').textContent   = s.total_users || 0;
+    document.getElementById('admStudents').textContent     = s.total_students || 0;
+    document.getElementById('admFaculty').textContent      = s.total_faculty || 0;
+    document.getElementById('admUserCount').textContent    = s.total_users || 0;
+    document.getElementById('admUserTotal').textContent    = s.total_users || 0;
+    document.getElementById('admUserStudents').textContent = s.total_students || 0;
+    document.getElementById('admUserFaculty').textContent  = s.total_faculty || 0;
+  }).catch(() => {});
+
+  // Recent scans (Dashboard tab)
+  fetch(API + '/api/scans').then(r => r.json()).then(d => {
+    _admAllScans = d.scans || [];
+    renderAdmScansTable(_admAllScans.slice(0, 10));
+  }).catch(() => {});
+
+  // Pre-load ALL other tabs + pending badge on admin login
+  loadAdminUsers();
+  loadAdminScanLogs();
+  loadAdminReports();
+  loadAdminAIModel();
+  loadApprovals(); // populates the pending badge count
+
+  // Health (Dashboard card)
+  fetch(API + '/api/health').then(r => r.json()).then(h => {
+    const healthy = h.status === 'healthy';
+    document.getElementById('adminHealthArea').innerHTML = '<div class="alert ' + (healthy?'success':'danger') + '"><i class="fas fa-' + (healthy?'check-circle':'times-circle') + '"></i><div><div class="alert-title">System ' + (healthy?'Healthy':'Unhealthy') + '</div><div class="alert-body">Plagiarism Engine: <strong>' + (h.models&&h.models.plagiarism_engine||'unknown') + '</strong> &middot; AI Detector: <strong>' + (h.models&&h.models.ai_detector||'unknown') + '</strong> &middot; DB: ' + (h.database||'unknown') + '</div></div></div>';
+  }).catch(() => {
+    document.getElementById('adminHealthArea').innerHTML = '<div class="alert danger"><i class="fas fa-times-circle"></i><div><div class="alert-title">Backend Offline</div><div class="alert-body">Cannot connect to Flask server. Run: py backend/app.py</div></div></div>';
+  });
+}
+
+function renderAdmScansTable(scans) {
+  document.getElementById('admTableBody').innerHTML = scans.length
+    ? scans.map(x => `<tr>
+        <td>${x.student_name || 'User'}</td>
+        <td>${x.filename || 'doc'}</td>
+        <td><strong>${(x.plagiarism_score || 0).toFixed(1)}%</strong></td>
+        <td>${(x.ai_score || 0).toFixed(1)}%</td>
+        <td><span class="risk-badge ${x.risk_level || 'low'}">${(x.risk_level || 'low').toUpperCase()}</span></td>
+        <td style="color:var(--text3)">${(x.processing_time || 0).toFixed(1)}s</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:2rem">No scans yet.</td></tr>';
+}
+
+function loadAdminUsers() {
+  fetch(API + '/api/users').then(r => r.json()).then(d => {
+    _admAllUsers = d.users || [];
+    document.getElementById('admUsersBody').innerHTML = _admAllUsers.length
+      ? _admAllUsers.map(u => `<tr>
+          <td><div style="font-weight:600;color:var(--text)">${u.full_name || 'Unknown'}</div></td>
+          <td>${u.email || '--'}</td>
+          <td><span class="user-role-tag ${u.role || 'student'}">${(u.role || 'student').toUpperCase()}</span></td>
+          <td><span class="badge ${u.status === 'active' ? 'low' : 'medium'}">${u.status || 'active'}</span></td>
+          <td style="color:var(--text3)">${u.created_at ? new Date(u.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '--'}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:2rem">No users found.</td></tr>';
+  }).catch(() => {
+    document.getElementById('admUsersBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:2rem">Could not load users. Backend may be offline.</td></tr>';
+  });
+}
+
+function loadAdminScanLogs() {
+  fetch(API + '/api/scans').then(r => r.json()).then(d => {
+    const scans = d.scans || [];
+    document.getElementById('admScanLogsBody').innerHTML = scans.length
+      ? scans.map(x => `<tr>
+          <td>${x.student_name || 'User'}</td>
+          <td>${x.filename || 'doc'}</td>
+          <td><strong>${(x.plagiarism_score || 0).toFixed(1)}%</strong></td>
+          <td>${(x.ai_score || 0).toFixed(1)}%</td>
+          <td><span class="risk-badge ${x.risk_level || 'low'}">${(x.risk_level || 'low').toUpperCase()}</span></td>
+          <td>${x.subject || '--'}</td>
+          <td style="color:var(--text3)">${x.created_at ? new Date(x.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '--'}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:2rem">No scan logs yet.</td></tr>';
+  }).catch(() => {
+    document.getElementById('admScanLogsBody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:2rem">Could not load logs. Backend may be offline.</td></tr>';
+  });
+}
+
+function loadAdminReports() {
+  fetch(API + '/api/scans').then(r => r.json()).then(d => {
+    const scans = d.scans || [];
+    if (!scans.length) {
+      document.getElementById('admReportsBody').innerHTML = '<p style="color:var(--text3);text-align:center;padding:2rem">No scans yet. Submit documents to generate reports.</p>';
+      document.getElementById('admTopFlaggedBody').innerHTML = '<p style="color:var(--text3);text-align:center;padding:2rem">No flagged documents yet.</p>';
+      return;
+    }
+
+    // Stats
+    const totalPlag = scans.reduce((a, s) => a + (s.plagiarism_score || 0), 0) / scans.length;
+    const totalAI = scans.reduce((a, s) => a + (s.ai_score || 0), 0) / scans.length;
+    const high = scans.filter(s => (s.risk_level === 'high' || s.risk_level === 'critical')).length;
+
+    document.getElementById('admReportsBody').innerHTML = `
+      <div class="gauge-row" style="margin-bottom:1rem">
+        <div class="gauge ${totalPlag>=60?'r':totalPlag>=30?'o':'g'}"><div class="gauge-val">${totalPlag.toFixed(1)}%</div><div class="gauge-lbl">Avg Plagiarism</div></div>
+        <div class="gauge ${totalAI>=60?'r':totalAI>=30?'o':'g'}"><div class="gauge-val">${totalAI.toFixed(1)}%</div><div class="gauge-lbl">Avg AI Score</div></div>
+        <div class="gauge r"><div class="gauge-val">${high}</div><div class="gauge-lbl">High Risk Docs</div></div>
+        <div class="gauge v"><div class="gauge-val">${scans.length}</div><div class="gauge-lbl">Total Scans</div></div>
+      </div>
+      <div class="alert ${high > 0 ? 'danger' : 'success'}">
+        <i class="fas fa-${high > 0 ? 'exclamation-triangle' : 'check-circle'}"></i>
+        <div><div class="alert-title">${high > 0 ? high + ' high-risk document(s) need faculty review' : 'Platform integrity looks good!'}</div>
+        <div class="alert-body">Average originality: ${(100 - totalPlag).toFixed(1)}% . ${scans.length} total submissions analyzed</div></div>
+      </div>`;
+
+    const topFlagged = [...scans].sort((a, b) => (b.plagiarism_score || 0) - (a.plagiarism_score || 0)).slice(0, 5);
+    document.getElementById('admTopFlaggedBody').innerHTML = topFlagged.map(x => `
+      <div style="display:flex;align-items:center;gap:.8rem;padding:.7rem 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1"><div style="font-weight:600;font-size:.86rem;color:var(--text)">${x.filename || 'doc'}</div><div style="font-size:.75rem;color:var(--text3)">${x.student_name || 'User'}</div></div>
+        <div style="text-align:right"><div style="font-weight:700;font-size:.9rem;color:${(x.plagiarism_score||0)>=60?'var(--red)':'var(--orange)'}">${(x.plagiarism_score||0).toFixed(1)}%</div><span class="risk-badge ${x.risk_level||'low'}" style="font-size:.68rem;padding:.2rem .5rem">${(x.risk_level||'low').toUpperCase()}</span></div>
+      </div>`).join('');
+  }).catch(() => {
+    document.getElementById('admReportsBody').innerHTML = '<p style="color:var(--text3);text-align:center;padding:2rem">Could not load reports. Backend may be offline.</p>';
+  });
+}
+
+function loadAdminAIModel() {
+  fetch(API + '/api/health').then(r => r.json()).then(h => {
+    const plagLoaded = h.models?.plagiarism_engine === 'loaded';
+    const aiLoaded = h.models?.ai_detector === 'loaded';
+    document.getElementById('admPlagEngine').textContent = plagLoaded ? 'Loaded' : 'Not Loaded';
+    document.getElementById('admAiDetector').textContent = aiLoaded ? 'Loaded' : 'Not Loaded';
+    document.getElementById('admAiHealthReport').innerHTML = `
+      <div class="alert ${h.status === 'healthy' ? 'success' : 'warning'}">
+        <i class="fas fa-${h.status === 'healthy' ? 'check-circle' : 'exclamation-triangle'}"></i>
+        <div>
+          <div class="alert-title">Backend: ${h.status === 'healthy' ? 'Online' : 'Degraded'}</div>
+          <div class="alert-body">
+            Version: ${h.version || '1.0'} . Database: ${h.database || 'unknown'}<br>
+            Plagiarism Engine: <strong>${h.models?.plagiarism_engine || 'unknown'}</strong> . AI Detector: <strong>${h.models?.ai_detector || 'unknown'}</strong><br>
+            Timestamp: ${h.timestamp || 'N/A'}
+          </div>
+        </div>
+      </div>`;
+  }).catch(() => {
+    document.getElementById('admPlagEngine').textContent = 'Offline';
+    document.getElementById('admAiDetector').textContent = 'Offline';
+    document.getElementById('admAiHealthReport').innerHTML = '<div class="alert danger"><i class="fas fa-times-circle"></i><div><div class="alert-title">Backend Offline</div><div class="alert-body">Cannot reach Flask server at ' + API + '. Run: python backend/app.py</div></div></div>';
+  });
+}
+
+function admSearchFilter(q) {
+  const lower = q.toLowerCase();
+  ['admTableBody','admScanLogsBody','admUsersBody'].forEach(id => {
+    const rows = document.querySelectorAll('#' + id + ' tr');
+    rows.forEach(r => { r.style.display = r.textContent.toLowerCase().includes(lower) ? '' : 'none'; });
+  });
+}
+
+// ──────────────────//   AI REFERENCE SOURCE BAR
+// ──────────────────// Tracks the currently selected doc's text+subject for auto-fetch
+let _facCurrentDocText = '';
+let _facCurrentDocSubject = '';
+
+/**
+ * Render paper results into a container div.
+ * Each paper shows: title (link), authors, year, type, abstract, DOI, PDF badge.
+ */
+function renderRefPapers(papers, containerId, sourceLabel) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  if (!papers || !papers.length) {
+    el.innerHTML = `<div style="text-align:center;color:var(--text3);padding:1.5rem;font-size:.83rem">
+      <i class="fas fa-search" style="display:block;font-size:1.4rem;opacity:.3;margin-bottom:.5rem"></i>
+      No papers found. Try different keywords or broader terms.
+    </div>`;
+    return;
+  }
+
+  const srcBadge = sourceLabel
+    ? `<div class="ref-source-badge"><i class="fas fa-database"></i>&nbsp;Results via ${sourceLabel}</div>` : '';
+
+  const items = papers.map(p => {
+    const isPDF = !!p.has_pdf;
+    const iconCls = isPDF ? 'pdf' : 'web';
+    const iconIco = isPDF ? 'fa-file-pdf' : 'fa-external-link-alt';
+    const abstract = p.abstract ? `<div class="ref-abstract">${p.abstract}</div>` : '';
+    const doiTag  = p.doi  ? `<span class="ref-doi">DOI: ${p.doi}</span>` : '';
+    const pdfTag  = isPDF  ? `<span class="ref-tag pdf"><i class="fas fa-file-pdf"></i> Open Access PDF</span>` : '';
+    const typeTag = p.type ? `<span class="ref-tag type">${p.type}</span>` : '';
+    const yearTag = (p.year && p.year !== 'N/A') ? `<span class="ref-tag year">${p.year}</span>` : '';
+    const srcTag  = p.source ? `<span class="ref-tag src">${p.source}</span>` : '';
+    const linkUrl = p.url || '#';
+    return `<div class="ref-item">
+      <div class="ref-ico ${iconCls}"><i class="fas ${iconIco}"></i></div>
+      <div class="ref-body">
+        <div class="ref-title"><a href="${linkUrl}" target="_blank" rel="noopener">${p.title || 'Untitled'}</a></div>
+        <div class="ref-authors"><i class="fas fa-user-edit" style="font-size:.65rem;margin-right:.25rem;opacity:.6"></i>${p.authors || 'Unknown Author'}</div>
+        ${abstract}
+        <div class="ref-meta">${yearTag}${typeTag}${pdfTag}${srcTag}${doiTag}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div class="ref-bar">${srcBadge}${items}</div>`;
+}
+
+/**
+ * Generic fetch+render helper.
+ */
+function _fetchAndRender(payload, barId, subId) {
+  const bar = document.getElementById(barId);
+  if (bar) bar.innerHTML = '<div class="ref-loading"><i class="fas fa-circle-notch"></i>Searching Semantic Scholar &amp; CrossRef...</div>';
+
+  fetch(API + '/api/references/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(d => {
+    const sub = document.getElementById(subId);
+    if (sub) {
+      const kw = (d.keyword_used || []).slice(0, 4).join(', ');
+      sub.textContent = `Found ${d.papers.length} paper(s) . ${kw ? 'Keywords: ' + kw + ' . ' : ''}via ${d.source || 'API'}`;
+    }
+    renderRefPapers(d.papers || [], barId, d.source);
+  })
+  .catch(() => {
+    const bar2 = document.getElementById(barId);
+    if (bar2) bar2.innerHTML = '<div class="ref-loading"><i class="fas fa-exclamation-circle" style="color:var(--orange);animation:none"></i>Could not reach reference API. Check backend &amp; internet.</div>';
+  });
+}
+
+// ────────────────── Faculty Analyse Tab â"€â"€
+
+/**
+ * Called from the faculty doc-select dropdown (onchange="loadFacDocAnalysis()").
+ * Also auto-fetches references when a document is selected.
+ * NOTE: The original loadFacDocAnalysis() is defined earlier in the script;
+ * we patch it here by adding a post-call that triggers reference loading.
+ */
+function _triggerFacRefOnSelect() {
+  const sel = document.getElementById('facDocSelect');
+  const idx = parseInt(sel ? sel.value : '');
+  if (!isNaN(idx) && window._facAllDocs && window._facAllDocs[idx]) {
+    const doc = window._facAllDocs[idx];
+    _facCurrentDocText    = doc.original_text || '';
+    _facCurrentDocSubject = doc.subject || '';
+    const subj = document.getElementById('facRefSubjectSel');
+    if (subj && _facCurrentDocSubject) subj.value = _facCurrentDocSubject;
+    setTimeout(() => _fetchAndRender(
+      { text: _facCurrentDocText.slice(0, 2000), subject: _facCurrentDocSubject },
+      'facRefBar', 'facRefSub'
+    ), 300);
+  }
+}
+
+// Patch the dropdown's onchange to also load references
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('facDocSelect');
+  if (sel) {
+    const origHandler = sel.onchange;
+    sel.onchange = function() {
+      if (origHandler) origHandler.call(this);
+      _triggerFacRefOnSelect();
+    };
+  }
+});
+
+function searchFacReferences() {
+  const q    = document.getElementById('facRefSearchInp').value.trim();
+  const subj = (document.getElementById('facRefSubjectSel') || {}).value || _facCurrentDocSubject;
+  if (!q && !_facCurrentDocText && !subj) { showToast('Type keywords or select a document first'); return; }
+  const payload = q
+    ? { keywords: q.split(/[\s,]+/).filter(Boolean), subject: subj }
+    : { text: _facCurrentDocText.slice(0, 2000), subject: subj };
+  _fetchAndRender(payload, 'facRefBar', 'facRefSub');
+}
+
+function refreshFacReferences() {
+  document.getElementById('facRefSearchInp').value = '';
+  if (_facCurrentDocText || _facCurrentDocSubject) {
+    _fetchAndRender({ text: _facCurrentDocText.slice(0, 2000), subject: _facCurrentDocSubject }, 'facRefBar', 'facRefSub');
+  } else {
+    showToast('Select a document from the dropdown above first');
+  }
+}
+
+// ────────────────── Admin Reports Tab (admTab-reports) â"€â"€
+function searchAdmReferences() {
+  const q    = (document.getElementById('admRefSearchInp') || {}).value || '';
+  const subj = (document.getElementById('admRefSubjectSel') || {}).value || '';
+  const qt   = q.trim();
+  if (!qt && !subj) { showToast('Enter keywords or pick a subject'); return; }
+  const payload = qt
+    ? { keywords: qt.split(/[\s,]+/).filter(Boolean), subject: subj }
+    : { text: '', subject: subj };
+  _fetchAndRender(payload, 'admRefBar', 'admRefSub');
+}
+
+// ────────────────── Admin Dashboard Tab (admTab-dashboard) â"€â"€
+function searchAdmRefDash() {
+  const q    = (document.getElementById('admRefSearchInpDash') || {}).value || '';
+  const subj = (document.getElementById('admRefSubjectSelDash') || {}).value || '';
+  const qt   = q.trim();
+  if (!qt && !subj) { showToast('Enter keywords or pick a subject'); return; }
+  const payload = qt
+    ? { keywords: qt.split(/[\s,]+/).filter(Boolean), subject: subj }
+    : { text: '', subject: subj };
+  _fetchAndRender(payload, 'admRefBarDash', 'admRefSubDash');
+}
+
+// ────────────────── Init â"€â"€
+updateDates();
+updateGreeting();
+setInterval(updateDates, 60000);
+
+
+</script>
+</body>
+</html>
